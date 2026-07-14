@@ -77,7 +77,7 @@ function App() {
             Lumora
           </div>
 
-          {/* Right — Desktop */}
+          {/* Right — Desktop (md+) */}
           <div className="hidden md:flex items-center gap-2 liquid-glass rounded-full px-2 py-1">
             {NAV_LINKS.map((link) => (
               <a
@@ -121,21 +121,24 @@ function App() {
           </button>
         </nav>
 
-        {/* ═══ Mobile Menu Overlay (z-50) ═══ */}
+        {/* ═══ Mobile Menu Overlay (fixed, z-50) ═══ */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-            <div className="flex flex-col items-center gap-6">
+          <div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center menu-overlay-enter"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div
+              className="flex flex-col items-center gap-6"
+              onClick={(e) => e.stopPropagation()}
+            >
               {NAV_LINKS.map((link, i) => (
                 <a
                   key={link}
                   href="#"
-                  className="text-white text-3xl"
+                  className="text-white text-3xl menu-link"
                   style={{
                     fontFamily: 'system-ui, sans-serif',
-                    transition: 'all 500ms cubic-bezier(0.4,0,0.2,1)',
-                    transitionDelay: `${100 + i * 50}ms`,
-                    opacity: 1,
-                    transform: 'translateY(0)',
+                    animationDelay: `${100 + i * 50}ms`,
                   }}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -144,13 +147,8 @@ function App() {
               ))}
               <a
                 href="#"
-                className="bg-white text-black text-lg font-medium rounded-full px-8 py-3 mt-4"
-                style={{
-                  fontFamily: 'system-ui, sans-serif',
-                  transition: 'all 500ms cubic-bezier(0.4,0,0.2,1)',
-                  transitionDelay: '350ms',
-                  transform: 'scale(1)',
-                }}
+                className="bg-white text-black text-lg font-medium rounded-full px-8 py-3 mt-4 menu-button"
+                style={{ fontFamily: 'system-ui, sans-serif' }}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Get Started

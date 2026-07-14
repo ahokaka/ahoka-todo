@@ -1,257 +1,231 @@
-import { useState, useCallback } from 'react';
-import { Menu, X } from 'lucide-react';
-import './index.css';
+import React, { useState, useCallback } from 'react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 
+// --- Data Constants ---
 const VIDEOS = [
   {
     url: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081127_0992a171-d3c6-4978-8213-0ec5df8b6d63.mp4',
-    label: 'Golden Hour',
+    label: 'Golden Hour'
   },
   {
     url: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_092026_dd05b805-ea0f-40b2-8c52-332b88502592.mp4',
-    label: 'Still Water',
+    label: 'Still Water'
   },
   {
     url: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081042_df7202bf-bd80-4b2b-bbc6-1f09ba2870e9.mp4',
-    label: 'Deep Woods',
+    label: 'Deep Woods'
   },
   {
     url: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_080959_4cac5234-3573-464e-a5b7-76b94b8a7d61.mp4',
-    label: 'Quiet Dawn',
-  },
+    label: 'Quiet Dawn'
+  }
 ];
 
-const NAV_LINKS = ['How It Works', 'Features', 'Pricing', 'Community'];
+const NAV_LINKS = ['Manifesto', 'Features', 'Pricing', 'Login'];
 
-function App() {
+export default function App() {
   const [activeVideo, setActiveVideo] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isDarkMode = activeVideo === 2; // "Deep Woods" — index 2
+  // Deep Woods (index 2) triggers dark mode text color
+  const isDarkMode = activeVideo === 2;
 
-  const handleVideoSwitch = useCallback(
-    (index) => {
-      if (index === activeVideo || isTransitioning) return;
-      setIsTransitioning(true);
-      setActiveVideo(index);
-      setTimeout(() => setIsTransitioning(false), 1000);
-    },
-    [activeVideo, isTransitioning]
-  );
+  const handleVideoSwitch = useCallback((index) => {
+    if (index === activeVideo || isTransitioning) return;
+    setIsTransitioning(true);
+    setActiveVideo(index);
+    setTimeout(() => setIsTransitioning(false), 1000);
+  }, [activeVideo, isTransitioning]);
+
+  const toggleMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+
+  // Shared system-ui font style helper
+  const sysStyle = { fontFamily: 'system-ui, sans-serif' };
 
   return (
     <section className="relative w-full h-screen overflow-hidden bg-black">
-      {/* ── Background Video Layer (z-0) ── */}
+      {/* --- Layer 0: Background Videos --- */}
       <div className="absolute inset-0 z-0">
-        {VIDEOS.map((video, i) => (
+        {VIDEOS.map((video, index) => (
           <video
-            key={i}
+            key={index}
+            src={video.url}
             autoPlay
+            loop
             muted
             playsInline
-            loop
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
-              i === activeVideo ? 'opacity-100' : 'opacity-0'
+              activeVideo === index ? 'opacity-100' : 'opacity-0'
             }`}
-            src={video.url}
           />
         ))}
       </div>
 
-      {/* ── Transparent PNG Overlay (z-[1]) ── */}
-      <div className="overlay-png absolute inset-0 z-[1] pointer-events-none" />
+      {/* --- Layer 1: Overlay Texture (PNG) --- */}
+      <div className="absolute inset-0 z-[1] overlay-png pointer-events-none mix-blend-overlay opacity-60" />
 
-      {/* ── Content Layer (z-10) ── */}
-      <div className="relative z-10 flex flex-col h-full text-white">
-        {/* ═══ Navigation ═══ */}
-        <nav
-          className="flex items-center justify-between px-4 sm:px-8 pt-4 sm:pt-6"
-          style={{ fontFamily: 'system-ui, sans-serif' }}
-        >
-          {/* Left — Logo */}
-          <div
-            className="text-xl sm:text-2xl text-white italic"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
-          >
+      {/* --- Layer 2: UI Content --- */}
+      <div className={`relative z-10 flex flex-col h-full transition-colors duration-700 ${isDarkMode ? 'text-[#182C41]' : 'text-white'}`}>
+
+        {/* Navbar */}
+        <nav className="flex items-center justify-between px-6 py-6 md:px-12">
+          {/* Logo */}
+          <div className={`font-serif text-xl tracking-wider font-bold ${isDarkMode ? 'text-[#182C41]' : 'text-white'}`}>
             Lumora
           </div>
 
-          {/* Right — Desktop (md+) */}
-          <div className="hidden md:flex items-center gap-2 liquid-glass rounded-full px-2 py-1">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link}
-                href="#"
-                className="text-white/90 hover:text-white text-sm px-3 py-1.5 transition-colors duration-200"
-              >
-                {link}
-              </a>
-            ))}
-            <a
-              href="#"
-              className="bg-white text-black text-sm font-medium rounded-full px-4 py-1.5 ml-1 hover:opacity-90 transition-opacity"
-            >
-              Get Started
-            </a>
+          {/* Desktop Nav (Hidden on Mobile) */}
+          <div className="hidden md:flex items-center gap-6">
+            <div className={`flex items-center px-4 py-2 rounded-full ${isDarkMode ? 'bg-[#182C41]/5' : 'liquid-glass bg-white/5'}`}>
+              {NAV_LINKS.map((link) => (
+                <a
+                  key={link}
+                  href="#"
+                  className={`px-3 py-1 text-sm transition-colors hover:text-purple-400 ${isDarkMode ? 'text-[#182C41]/70' : 'text-white/80'}`}
+                  style={sysStyle}
+                >
+                  {link}
+                </a>
+              ))}
+            </div>
           </div>
 
-          {/* Right — Mobile Hamburger */}
+          {/* Mobile Menu Button */}
           <button
-            className="md:hidden liquid-glass rounded-full w-10 h-10 flex items-center justify-center relative"
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            onClick={toggleMenu}
+            className={`md:hidden p-2 rounded-full transition-colors ${isDarkMode ? 'text-[#182C41]' : 'text-white'}`}
           >
-            <Menu
-              size={20}
-              className={`absolute transition-all duration-300 ${
-                mobileMenuOpen
-                  ? 'opacity-0 rotate-90 scale-75'
-                  : 'opacity-100 rotate-0 scale-100'
-              }`}
-            />
-            <X
-              size={20}
-              className={`absolute transition-all duration-300 ${
-                mobileMenuOpen
-                  ? 'opacity-100 rotate-0 scale-100'
-                  : 'opacity-0 -rotate-90 scale-75'
-              }`}
-            />
+            {mobileMenuOpen ? (
+              <X size={24} />
+            ) : (
+              <Menu size={24} />
+            )}
           </button>
         </nav>
 
-        {/* ═══ Mobile Menu Overlay (fixed, z-50) ═══ */}
+        {/* Mobile Menu Overlay */}
         {mobileMenuOpen && (
-          <div
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center menu-overlay-enter"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <div
-              className="flex flex-col items-center gap-6"
-              onClick={(e) => e.stopPropagation()}
-            >
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl menu-overlay-enter">
+            <div className="flex flex-col gap-8 text-center">
               {NAV_LINKS.map((link, i) => (
                 <a
                   key={link}
                   href="#"
-                  className="text-white text-3xl menu-link"
-                  style={{
-                    fontFamily: 'system-ui, sans-serif',
-                    animationDelay: `${100 + i * 50}ms`,
-                  }}
+                  className={`text-3xl font-serif transition-colors hover:text-purple-400 menu-link`}
+                  style={{ animationDelay: `${100 + i * 50}ms` }}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link}
                 </a>
               ))}
-              <a
-                href="#"
-                className="bg-white text-black text-lg font-medium rounded-full px-8 py-3 mt-4 menu-button"
-                style={{ fontFamily: 'system-ui, sans-serif' }}
-                onClick={() => setMobileMenuOpen(false)}
+              <button
+                className="mt-8 px-8 py-3 rounded-full bg-white text-black font-medium menu-button"
+                style={{ animationDelay: `${100 + NAV_LINKS.length * 50}ms` }}
               >
                 Get Started
-              </a>
+              </button>
             </div>
           </div>
         )}
 
-        {/* ═══ Spacer ═══ */}
+        {/* Spacer */}
         <div className="flex-1" />
 
-        {/* ═══ Hero Content ═══ */}
-        <div
-          className={`flex flex-col items-center text-center px-4 gap-4 sm:gap-5 transition-colors duration-700 ${
-            isDarkMode ? 'text-[#182C41]' : 'text-white'
-          }`}
-          style={{ fontFamily: 'system-ui, sans-serif' }}
-        >
+        {/* Hero Content */}
+        <main className="flex flex-col items-center text-center px-6 max-w-4xl mx-auto -mt-20">
+
           {/* Badge */}
-          <div className="liquid-glass rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium inline-flex items-center">
-            <span className={isDarkMode ? 'text-[#182C41]/90' : 'text-white/90'}>
-              Over 10,000 minds already finding their clarity
+          <div
+            className={`mb-8 px-4 py-1.5 rounded-full border border-white/10 backdrop-blur-md menu-button`}
+            style={{ animationDelay: '100ms' }}
+          >
+            <span
+              className="text-xs tracking-widest uppercase font-medium"
+              style={{ ...sysStyle, color: isDarkMode ? '#182C41' : 'rgba(255,255,255,0.7)' }}
+            >
+              New Release v2.0
             </span>
           </div>
 
-          {/* Heading */}
-          <h1
-            className="text-4xl sm:text-5xl md:text-7xl lg:text-[5.5rem] leading-[1.1] max-w-4xl font-normal"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
-          >
-            Clarity in an Endlessly<br />Noisy Universe
+          {/* Headline */}
+          <h1 className="text-5xl md:text-7xl lg:text-8xl leading-[1.1] mb-6 font-serif">
+            Clarity in an Endlessly<br />
+            <span className="italic text-purple-400">Noisy Universe</span>
           </h1>
 
           {/* Subtext */}
-          <p className="max-w-xl leading-relaxed text-sm sm:text-base opacity-80">
-            Rise above the chaos of pings, infinite scrolling, and relentless
-            demands. Discover how to protect your presence and create with
-            intention.
+          <p
+            className={`max-w-lg mb-10 leading-relaxed ${isDarkMode ? 'text-[#182C41]/70' : 'text-white/60'}`}
+            style={{ ...sysStyle, fontSize: '1.1rem' }}
+          >
+            Experience the next generation of digital focus. Distraction-free environments designed for deep work and creative flow.
           </p>
 
-          {/* Email Input */}
-          <div className="liquid-glass rounded-full flex items-center w-full max-w-[320px] sm:max-w-sm mt-2">
-            <input
-              type="email"
-              placeholder="Your Best Email"
-              className={`bg-transparent text-sm px-4 py-2.5 flex-1 outline-none min-w-0 placeholder-white/50 ${
-                isDarkMode ? 'text-[#182C41] placeholder-[#182C41]/50' : 'text-white'
-              }`}
-              style={{ fontFamily: 'system-ui, sans-serif' }}
-            />
-            <a
-              href="#"
-              className="bg-white text-black text-xs sm:text-sm font-medium rounded-full px-4 py-2 mr-1 whitespace-nowrap hover:opacity-90 transition-opacity flex-shrink-0"
-              style={{ fontFamily: 'system-ui, sans-serif' }}
-            >
-              Get Early Access
-            </a>
+          {/* Email Input Group */}
+          <div
+            className="flex flex-col sm:flex-row items-center gap-3 p-2 rounded-full menu-button"
+            style={{ animationDelay: '400ms' }}
+          >
+            <div className="relative w-full sm:w-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className={`w-full sm:w-64 px-5 py-3 rounded-full outline-none transition-all ${isDarkMode ? 'bg-[#182C41]/10 text-[#182C41] placeholder:text-[#182C41]/40' : 'liquid-glass bg-white/5 text-white placeholder:text-white/40'} focus:ring-2 focus:ring-purple-500/50`}
+                style={{ ...sysStyle, fontSize: '0.9rem' }}
+              />
+            </div>
+            <button className={`w-full sm:w-auto px-8 py-3 rounded-full font-medium transition-transform active:scale-95 flex items-center justify-center gap-2 ${isDarkMode ? 'bg-[#182C41] text-white' : 'bg-white text-black'}`}>
+              Join Waitlist <ArrowRight size={16} />
+            </button>
           </div>
 
-          {/* Video Switcher */}
-          <div className="flex items-center gap-4 sm:gap-6 mt-2 flex-wrap justify-center">
-            {VIDEOS.map((video, i) => (
+          {/* Video Switcher (Dots) */}
+          <div className="mt-16 flex gap-3 menu-button" style={{ animationDelay: '500ms' }}>
+            {VIDEOS.map((video, index) => (
               <button
-                key={i}
-                onClick={() => handleVideoSwitch(i)}
-                disabled={isTransitioning}
-                className={`text-xs sm:text-sm tracking-wide pb-1 transition-all duration-300 ${
-                  i === activeVideo
-                    ? `font-medium ${
-                        isDarkMode
-                          ? 'text-[#182C41] border-b-2 border-[#182C41]'
-                          : 'text-white border-b-2 border-white'
-                      }`
-                    : `opacity-50 hover:opacity-80 border-b-2 border-transparent ${
-                        isDarkMode ? 'text-[#182C41]' : 'text-white'
-                      }`
+                key={index}
+                onClick={() => handleVideoSwitch(index)}
+                className={`group relative w-2 h-2 rounded-full transition-all duration-300 ${
+                  activeVideo === index
+                    ? 'w-8 bg-purple-500'
+                    : 'bg-white/30 hover:bg-white/60'
                 }`}
+                aria-label={`Switch to ${video.label}`}
               >
-                {video.label}
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap" style={sysStyle}>
+                  {video.label}
+                </span>
               </button>
             ))}
           </div>
-        </div>
 
-        {/* ═══ Spacer ═══ */}
+        </main>
+
+        {/* Spacer */}
         <div className="flex-1" />
 
-        {/* ═══ Bottom Stats ═══ */}
-        <div
-          className="flex items-center justify-center gap-2 sm:gap-4 px-4 pb-6 sm:pb-8 flex-wrap text-white/70 text-xs sm:text-sm"
-          style={{ fontFamily: 'system-ui, sans-serif' }}
-        >
-          <span>60+ Deep Sessions</span>
-          <span className="hidden sm:inline text-white/30">|</span>
-          <span>12,000+ Creators</span>
-          <span className="hidden sm:inline text-white/30">|</span>
-          <span>4.8 User Satisfaction</span>
-          <span className="hidden sm:inline text-white/30">|</span>
-          <span>Intentional-First Design</span>
-        </div>
+        {/* Bottom Stats / Footer Area */}
+        <footer className={`px-6 py-8 md:px-12 flex justify-between items-center text-xs uppercase tracking-widest ${isDarkMode ? 'text-[#182C41]/50' : 'text-white/30'}`} style={sysStyle}>
+          <div>© 2026 Lumora Inc.</div>
+
+          {/* Stats with Pipe Separators (Desktop) */}
+          <div className="hidden md:flex items-center gap-4">
+            <span>10k+ Users</span>
+            <span>|</span>
+            <span>99.9% Uptime</span>
+            <span>|</span>
+            <span>Global CDN</span>
+          </div>
+
+          {/* Mobile-only Stats (No pipes) */}
+          <div className="md:hidden flex gap-4">
+            <span>10k+ Users</span>
+            <span>99.9% Uptime</span>
+          </div>
+        </footer>
+
       </div>
     </section>
   );
 }
-
-export default App;

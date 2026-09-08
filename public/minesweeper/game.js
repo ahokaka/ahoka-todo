@@ -512,13 +512,13 @@ for (let c = 0; c < Game.cols; c++) {
     if (inp && Game.seed) inp.value = Game.seed;
   }
 
-  // Start a new game using the provided seed (or a random one if blank).
+// Start a new game using the provided seed (or a random one if blank).
   function setSeed(raw) {
     let s = (raw || "").trim();
     if (!s) s = makeRandomSeed();
     Game.seed = s;
     syncSeedInput();
-    newGame();
+    newGame(false);   // keep the explicitly set seed
   }
 
   /* ------------------- Rendering a cell ------------------- */
@@ -809,8 +809,14 @@ for (let c = 0; c < Game.cols; c++) {
     toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
   }
 
-  /* ------------------- New game / action dispatch ------------------- */
-  function newGame() {
+/* ------------------- New game / action dispatch ------------------- */
+  function newGame(refreshSeed) {
+    // Every new game gets a fresh random seed automatically,
+    // unless a seed was just set explicitly (refreshSeed === false).
+    if (refreshSeed !== false) {
+      Game.seed = makeRandomSeed();
+      syncSeedInput();
+    }
     resetBoard();
   }
 

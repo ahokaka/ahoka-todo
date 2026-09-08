@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Minesweeper — Windows Classic (No-Guess)</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="desktop">
+    <div class="window" id="gameWindow">
+      <!-- Title bar -->
+      <div class="titlebar">
+        <div class="titlebar-left">
+          <span class="app-icon" aria-hidden="true">💣</span>
+          <span class="titlebar-text">Minesweeper</span>
+        </div>
+        <div class="titlebar-controls" aria-hidden="true">
+          <button class="tb-btn tb-min" title="Minimize">─</button>
+          <button class="tb-btn tb-max" title="Maximize">□</button>
+          <button class="tb-btn tb-close" title="Close">✕</button>
+        </div>
+      </div>
+
+      <!-- Menu bar -->
+      <div class="menubar">
+        <button class="menu-btn" id="menuGame" data-menu="game">Game</button>
+        <button class="menu-btn" id="menuHelp" data-menu="help">Help</button>
+      </div>
+
+      <!-- Dropdown menus -->
+      <div class="menu-popover" id="popoverGame" hidden>
+        <div class="menu-item" data-action="new" onclick="Game.menuAction('new')">New&nbsp;&nbsp;<span class="menu-short">F2</span></div>
+        <div class="menu-sep"></div>
+        <div class="menu-item" data-action="beginner">Beginner&nbsp;&nbsp;<span class="menu-check" id="checkBeginner">✓</span></div>
+        <div class="menu-item" data-action="intermediate">Intermediate</div>
+        <div class="menu-item" data-action="expert">Expert</div>
+        <div class="menu-sep"></div>
+        <div class="menu-item" data-action="sound">
+          Sound
+          <span class="menu-check" id="checkSound">✓</span>
+        </div>
+      </div>
+      <div class="menu-popover" id="popoverHelp" hidden>
+        <div class="menu-item" data-action="howto" onclick="Game.menuAction('howto')">How to Play</div>
+        <div class="menu-item" data-action="about" onclick="Game.menuAction('about')">About</div>
+      </div>
+
+      <!-- Game shell -->
+      <div class="game-shell">
+        <!-- Top row -->
+        <div class="top-panel">
+          <div class="counter" id="mineCounter" aria-label="Mine counter">010</div>
+          <div class="top-center">
+            <button class="face" id="faceButton" title="New game" aria-label="New game">🙂</button>
+            <button class="face pause-btn" id="pauseButton" title="Pause (P)" aria-label="Pause">⏸</button>
+          </div>
+          <div class="counter" id="timerCounter" aria-label="Timer">00:00</div>
+        </div>
+
+<!-- Board -->
+        <div class="board-wrap">
+          <div class="board" id="board" role="grid"></div>
+          <div class="pause-overlay" id="pauseOverlay" hidden>
+            <span class="pause-msg">⏸ PAUSED</span>
+          </div>
+        </div>
+
+        <!-- Status bar -->
+        <div class="statusbar">
+          <span id="statusText">Ready</span>
+          <span class="status-hint">Right-click to flag</span>
+        </div>
+
+        <!-- Seed controls -->
+        <div class="seed-panel">
+          <label class="seed-label" for="seedInput">Seed</label>
+          <input id="seedInput" class="seed-input" type="text" maxlength="40"
+                 placeholder="e.g. ABC123" spellcheck="false" autocomplete="off" />
+          <button id="seedApply" class="seed-btn" title="New game with this seed">New</button>
+          <button id="seedRandom" class="seed-btn" title="Random seed">🎲</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

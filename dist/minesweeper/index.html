@@ -3,24 +3,25 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Minesweeper — Windows Classic (No-Guess)</title>
-<link rel="stylesheet" href="style.css?v=2" />
+<title>Minesweeper — Anton’s Arcade</title>
+<meta name="theme-color" content="#090909" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css?v=3" />
 </head>
 <body>
-  <a href="../index.html" style="position:fixed;top:12px;left:16px;color:white;font:13px system-ui,sans-serif;text-underline-offset:4px;z-index:10">← 返回首页</a>
-  <div class="desktop">
+  <header class="arcade-header"><a class="arcade-brand" href="../index.html">ANTON’S ARCADE</a><a class="back-link" href="../index.html">← 返回首页</a></header>
+  <main class="desktop">
+    <div class="game-intro"><span>NO. 001 / A LITTLE LOGIC, A LITTLE JOY.</span><h1>Minesweeper<span>扫雷</span></h1><p>熟悉的方格，全新的一局。让逻辑先走。</p></div>
     <div class="window" id="gameWindow">
       <!-- Title bar -->
       <div class="titlebar">
         <div class="titlebar-left">
-          <span class="app-icon" aria-hidden="true">💣</span>
-          <span class="titlebar-text">Minesweeper</span>
+
+          <span class="titlebar-text">THE PLAYING FIELD</span>
         </div>
-        <div class="titlebar-controls" aria-hidden="true">
-          <button class="tb-btn tb-min" title="Minimize">─</button>
-          <button class="tb-btn tb-max" title="Maximize">□</button>
-          <button class="tb-btn tb-close" title="Close">✕</button>
-        </div>
+        <span class="game-badge">LOGIC / PLAY</span>
       </div>
 
       <!-- Menu bar -->
@@ -31,20 +32,20 @@
 
       <!-- Dropdown menus -->
       <div class="menu-popover" id="popoverGame" hidden>
-        <div class="menu-item" data-action="new" onclick="Game.menuAction('new')">New&nbsp;&nbsp;<span class="menu-short">F2</span></div>
+        <button type="button" class="menu-item" data-action="new" onclick="Game.menuAction('new')">New&nbsp;&nbsp;<span class="menu-short">F2</span></button>
         <div class="menu-sep"></div>
-        <div class="menu-item" data-action="beginner">Beginner&nbsp;&nbsp;<span class="menu-check" id="checkBeginner">✓</span></div>
-        <div class="menu-item" data-action="intermediate">Intermediate</div>
-        <div class="menu-item" data-action="expert">Expert</div>
+        <button type="button" class="menu-item" data-action="beginner">Beginner&nbsp;&nbsp;<span class="menu-check" id="checkBeginner">✓</span></button>
+        <button type="button" class="menu-item" data-action="intermediate">Intermediate</button>
+        <button type="button" class="menu-item" data-action="expert">Expert</button>
         <div class="menu-sep"></div>
-        <div class="menu-item" data-action="sound">
+        <button type="button" class="menu-item" data-action="sound">
           Sound
           <span class="menu-check" id="checkSound">✓</span>
-        </div>
+        </button>
       </div>
       <div class="menu-popover" id="popoverHelp" hidden>
-        <div class="menu-item" data-action="howto" onclick="Game.menuAction('howto')">How to Play</div>
-        <div class="menu-item" data-action="about" onclick="Game.menuAction('about')">About</div>
+        <button type="button" class="menu-item" data-action="howto" onclick="Game.menuAction('howto')">How to Play</button>
+        <button type="button" class="menu-item" data-action="about" onclick="Game.menuAction('about')">About</button>
       </div>
 
       <!-- Game shell -->
@@ -83,8 +84,9 @@
         </div>
       </div>
     </div>
-  </div>
+    <p class="game-footnote">左键翻开 · 右键插旗 · F2 重开 · P 暂停</p>
+  </main>
 
-<script src="game.js?v=2"></script>
+<script src="game.js?v=3"></script>
 </body>
 </html>

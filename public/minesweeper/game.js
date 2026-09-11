@@ -457,7 +457,7 @@ updateTimer();
 
 function renderBoard() {
     boardEl.innerHTML = "";
-    boardEl.style.gridTemplateColumns = "repeat(" + Game.cols + ", 24px)";
+    boardEl.style.gridTemplateColumns = "repeat(" + Game.cols + ", var(--cell-size))";
     for (let r = 0; r < Game.rows; r++) {
 for (let c = 0; c < Game.cols; c++) {
         const div = document.createElement("div");

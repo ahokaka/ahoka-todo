@@ -1,10 +1,13 @@
-# Homepage
+# Anton's Arcade
 
-The homepage is static HTML in `index.html`, styled by `src/home.css`. Vite produces the deployable `dist/` directory. The previous React style experiment remains in `src/App.jsx` and `src/index.css`.
+The homepage uses `index.html`, `src/home.css`, and the original curved WebGL card spiral restored in `src/spiral.js`. Its bundled Three.js is retained in `src/vendor/`. The earlier React experiment remains in `src/App.jsx` and `src/index.css`.
 
 - Build: `npm ci` then `npm run build`.
-- Check: `node scripts/check-site.mjs`.
+- Check: `node scripts/check-site.mjs` and `node scripts/check-spiral.mjs`.
 - Deploy: commit source and `dist/`, then push `main`; the existing Cloudflare integration publishes `dist/`.
-- Game: `public/minesweeper/index.html`. Game logic and styling are preserved; the page adds a home link.
-- `public/home/minesweeper.png` is an actual screenshot of this repository's game.
-- The three decorative WebP patterns come from the provided local Grail reference assets (https://grail-app.com/). They are used as reference-derived decoration, not as a claim of original artwork. No Grail logo or product text is used.
+- Drag the spiral directly; release for inertia. The pause button stops automatic motion. Reduced motion starts paused; offscreen/hidden pages skip rendering.
+- The pink Minesweeper card opens `public/minesweeper/index.html`. Its matching dark/pink styling retains existing game logic; grid columns now follow the responsive CSS cell size.
+- The original Loop experiment is preserved at `public/game.html` and linked from its spiral card. Other cards are labeled visual experiments.
+- `public/home/minesweeper.png` is an actual screenshot of the restyled game.
+
+Visual direction references https://grail-app.com/. Existing reference WebP assets are retained; no Grail logo or product copy is used. Google Fonts have local fallbacks.

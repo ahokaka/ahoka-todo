@@ -23,24 +23,20 @@
     </nav>
   </header>
   <main>
-    <section class="hero" aria-labelledby="hero-title">
+    <section class="hero spiral-stage" id="stage" aria-labelledby="hero-title">
       <h1 id="hero-title">MAKE TIME TO PLAY.</h1>
-      <div class="card-stage" id="games">
-        <div class="patterns" aria-hidden="true">
-          <img class="pattern p1" src="./home/tempers.webp" alt="" width="220" height="285" />
-          <img class="pattern p2" src="./home/keepers-of-time.webp" alt="" width="220" height="285" />
-          <img class="pattern p3" src="./home/brotherhood-of-tale.webp" alt="" width="220" height="285" />
-          <img class="pattern p4" src="./home/keepers-of-time.webp" alt="" width="220" height="285" />
-          <img class="pattern p5" src="./home/brotherhood-of-tale.webp" alt="" width="220" height="285" />
-          <img class="pattern p6" src="./home/tempers.webp" alt="" width="220" height="285" />
-        </div>
-        <a class="story-card floating" href="#about">
-          <span class="card-kicker">A SMALL PERSONAL ARCADE <span>02</span></span>
-          <h2>把随手冒出来<br />的念头，<br />做成游戏。</h2>
-          <p>有些想法，值得点开看看。<br />这里收藏我做的小东西，<br />和那些「再来一局」的时刻。</p>
-          <span class="card-bottom">认识一下 <span class="round-arrow" aria-hidden="true">↗</span></span>
-        </a>
-        <a class="game-card floating" href="./minesweeper/index.html" aria-label="开始玩扫雷 Minesweeper">
+      <div class="stage__gl" id="stageGL" aria-hidden="true"></div>
+      <canvas class="stage__mask" id="stageMask" aria-hidden="true"></canvas>
+      <div class="stage__hit" id="stageHit" aria-hidden="true"></div>
+      <div class="spiral-toolbar">
+        <span>拖动旋转 · 点击扫雷卡片开玩</span>
+        <button type="button" id="motionToggle" aria-pressed="false">暂停旋转</button>
+        <a href="#games">查看游戏 ↓</a>
+      </div>
+    </section>
+    <section id="games" class="games" aria-labelledby="games-title">
+      <div class="games-intro"><span class="eyebrow">PICK A CARD. TAKE A BREAK.</span><h2 id="games-title">一点好奇心，<br />一局小游戏。</h2><p>不用下载，不用登录。<br />从熟悉的方格，开始新的一局。</p></div>
+        <a class="game-card" href="./minesweeper/index.html" aria-label="开始玩扫雷 Minesweeper">
           <span class="card-kicker"><span class="available">现在可玩</span><span>NO. 001</span></span>
           <div class="game-heading"><h2>Minesweeper</h2><span>扫雷</span></div>
           <p class="game-description">熟悉的方格。全新的一局。<br />让直觉慢一点，让逻辑先走。</p>
@@ -48,10 +44,9 @@
           <span class="game-tags">经典解谜 <span>·</span> 随机种子 <span>·</span> 纯逻辑</span>
           <span class="card-bottom">来一局扫雷 <span class="round-arrow" aria-hidden="true">↗</span></span>
         </a>
-      </div>
-        <div class="stage-caption"><span>一点好奇心，一点空闲时间。</span><span>不用下载，不用登录。</span></div>
-      <div class="hero-foot"><span>INDEPENDENT & PLAYFUL</span><a href="#about">往下看看 <span aria-hidden="true">↓</span></a><span>EST. 2026</span></div>
     </section>
+    <script type="application/json" id="spiralData">[{"title": "Bounce", "kick": "视觉实验 · Bounce", "mark": "⇡", "bg": "#8a98a8", "fg": "#3f4a57"}, {"title": "Type Rush", "kick": "视觉实验 · Type Rush", "mark": "⌨", "bg": "#b8923a", "fg": "#5a4418", "desc": "单词从四面八方涌来。敲得越快，世界越亮。"}, {"title": "Last Tower", "kick": "视觉实验 · Last Tower", "mark": "♜", "bg": "#a85f4a", "fg": "#f0dcd4"}, {"title": "Tide", "kick": "视觉实验 · Tide", "mark": "≈", "bg": "#6a8fa8", "fg": "#d4e4ef"}, {"title": "Fathom", "kick": "视觉实验 · Fathom", "mark": "◉", "bg": "#4a6a7a", "fg": "#cfe4ee"}, {"title": "Loop", "kick": "Loop · 可玩原型", "mark": "⌁", "bg": "#f2ddf7", "fg": "#7b2f9e", "desc": "你控制的是自己三秒前的影子。", "href": "./game.html"}, {"title": "Pulse", "kick": "视觉实验 · Pulse", "mark": "♪", "bg": "#a86a8a", "fg": "#4a2a3a", "desc": "没有轨道，没有音符，只有心跳。"}, {"title": "Drift", "kick": "视觉实验 · Drift", "mark": "◈", "bg": "#4a7a9e", "fg": "#bfe0f0"}, {"title": "Moss", "kick": "视觉实验 · Moss", "mark": "❖", "bg": "#7a8f6a", "fg": "#33402a"}, {"title": "Orbit", "kick": "视觉实验 · Orbit", "mark": "❋", "bg": "#8a6aa8", "fg": "#4a3560"}, {"title": "Lantern", "kick": "视觉实验 · Lantern", "mark": "☗", "bg": "#d9c94a", "fg": "#6b6320", "desc": "一盏灯，一条没人走过的路。"}, {"title": "Hollow", "kick": "视觉实验 · Hollow", "mark": "⌂", "bg": "#8a5f3a", "fg": "#3d2a1a"}, {"title": "Cinder", "kick": "视觉实验 · Cinder", "mark": "✳", "bg": "#b23a2a", "fg": "#f2e8d5"}, {"title": "Signal", "kick": "视觉实验 · Signal", "mark": "≡", "bg": "#5f7a6a", "fg": "#d8e8dd"}, {"title": "Prism", "kick": "视觉实验 · Prism", "mark": "⬡", "bg": "#c4b8d4", "fg": "#5a4a70"}, {"title": "Rust", "kick": "视觉实验 · Rust", "mark": "◐", "bg": "#a07a4a", "fg": "#3a2a14"}, {"title": "Minesweeper", "kick": "扫雷 · 现在可玩", "mark": "⚑", "bg": "#f2cdf8", "fg": "#382339", "desc": "熟悉的方格，全新的一局。", "href": "./minesweeper/index.html", "featured": true}, {"title": "Vertex", "kick": "视觉实验 · Vertex", "mark": "◭", "bg": "#7a8aa8", "fg": "#2f3a52"}, {"title": "Quartz", "kick": "视觉实验 · Quartz", "mark": "◫", "bg": "#b0a8c8", "fg": "#443a58"}, {"title": "Lumen", "kick": "视觉实验 · Lumen", "mark": "☀", "bg": "#b8a04a", "fg": "#4a3f14"}, {"title": "Basalt", "kick": "视觉实验 · Basalt", "mark": "◮", "bg": "#6a6a72", "fg": "#2a2a30"}, {"title": "Nectar", "kick": "视觉实验 · Nectar", "mark": "❂", "bg": "#a8804a", "fg": "#3f2c10"}, {"title": "Onyx", "kick": "视觉实验 · Onyx", "mark": "◇", "bg": "#7a7a8a", "fg": "#2f2f3a"}, {"title": "Solstice", "kick": "视觉实验 · Solstice", "mark": "◑", "bg": "#a87a5a", "fg": "#3a2410"}, {"title": "Halcyon", "kick": "视觉实验 · Halcyon", "mark": "◌", "bg": "#7a9aa8", "fg": "#2f4a54"}, {"title": "Verdant", "kick": "视觉实验 · Verdant", "mark": "❃", "bg": "#6a8a5a", "fg": "#2a3a20"}, {"title": "Marl", "kick": "视觉实验 · Marl", "mark": "◍", "bg": "#8a8478", "fg": "#3a342c"}, {"title": "Pyre", "kick": "视觉实验 · Pyre", "mark": "◈", "bg": "#a85a3a", "fg": "#f4e0d0"}, {"title": "Lattice", "kick": "视觉实验 · Lattice", "mark": "▦", "bg": "#7a8ab0", "fg": "#2a3450"}, {"title": "Dusk", "kick": "视觉实验 · Dusk", "mark": "◒", "bg": "#5a5a72", "fg": "#1f1f2a"}, {"title": "Tessera", "kick": "视觉实验 · Tessera", "mark": "▩", "bg": "#b0a090", "fg": "#443a30"}, {"title": "Harrow", "kick": "视觉实验 · Harrow", "mark": "✦", "bg": "#8a6a6a", "fg": "#3a2020"}, {"title": "Cobalt", "kick": "视觉实验 · Cobalt", "mark": "◘", "bg": "#4a5a9e", "fg": "#cfe0f4"}, {"title": "Sable", "kick": "视觉实验 · Sable", "mark": "◙", "bg": "#6a6a7a", "fg": "#26262f"}, {"title": "Aurum", "kick": "视觉实验 · Aurum", "mark": "◉", "bg": "#b8a04a", "fg": "#4a3a10"}, {"title": "Vessel", "kick": "视觉实验 · Vessel", "mark": "◬", "bg": "#8a7aa8", "fg": "#382c50"}, {"title": "Zenith", "kick": "视觉实验 · Zenith", "mark": "▲", "bg": "#a8927a", "fg": "#3a2e1c"}]</script>
+    <script type="module" src="/src/spiral.js"></script>
     <section class="about" id="about" aria-labelledby="about-title">
       <div class="section-label"><span>ABOUT THIS LITTLE CORNER</span><span>01 / 01</span></div>
       <div class="about-body">

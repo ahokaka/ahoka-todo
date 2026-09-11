@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Loop — Anton's Arcade</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+  :root{
+    --ink:#17111c; --ink-soft:#221826;
+    --accent:#ffcdff; --accent-2:#d48fff;
+    --text:#f4f0f6; --text-dim:#a99fb0; --line:#ffffff1f;
+    --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;
+    --font-serif:'Instrument Serif',Georgia,serif;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--ink); color:var(--text);
+    font-family:var(--font-sans);
+    -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column;
+    overflow:hidden;
+    touch-action:none;
+  }
+  /* 顶部条，和主站同一套语言 */
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 22px; flex:0 0 auto; z-index:5;
+  }
+  .back{
+    display:flex; align-items:center; gap:9px;
+    font-size:11px; letter-spacing:.2em; color:var(--text-dim);
+    transition:color .25s;
+  }
+  .back:hover{color:var(--text)}
+  .mark{
+    width:26px;height:26px;border-radius:7px;
+    display:grid;place-items:center;
+    background:linear-gradient(140deg,var(--accent),var(--accent-2));
+    color:#1a1020;font-weight:700;font-size:13px;
+  }
+  .hud{display:flex;gap:26px;align-items:center}
+  .hud__item{display:flex;flex-direction:column;gap:2px;align-items:flex-end}
+  .hud__num{
+    font-family:var(--font-serif);font-size:26px;line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .hud__label{font-size:9.5px;letter-spacing:.18em;color:var(--text-dim)}
+
+  /* 画布 */
+  .wrap{flex:1 1 auto; position:relative; min-height:0}
+  canvas{display:block;width:100%;height:100%}
+
+  /* 开场 / 结束的覆盖层 */
+  .veil{
+    position:absolute;inset:0;z-index:10;
+    display:grid;place-items:center;
+    background:radial-gradient(circle at 50% 45%, #221826e6, #0d0912f7);
+    backdrop-filter:blur(6px);
+    text-align:center; padding:24px;
+    transition:opacity .45s var(--ease), visibility .45s;
+  }
+  .veil.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+  .veil h1{
+    font-family:var(--font-serif);font-weight:400;
+    font-size:clamp(44px,9vw,104px);line-height:.92;letter-spacing:-.03em;
+    margin-bottom:14px;
+  }
+  .veil p{color:var(--text-dim);max-width:34ch;margin:0 auto;font-size:14.5px;line-height:1.6}
+  .veil .key{
+    display:inline-block;padding:2px 8px;margin:0 2px;
+    border:1px solid var(--line);border-radius:6px;
+    background:#ffffff0f;font-size:12px;color:var(--text);
+  }
+  .btn{
+    margin-top:26px;display:inline-block;cursor:pointer;
+    padding:13px 26px;border-radius:999px;
+    border:1px solid var(--line);background:#ffffff0f;color:var(--text);
+    font:inherit;font-size:13px;letter-spacing:.08em;
+    backdrop-filter:blur(12px);
+    transition:all .3s var(--ease);
+  }
+  .btn:hover{background:var(--accent);color:#1a1020;border-color:var(--accent)}
+  .final{font-family:var(--font-serif);font-size:60px;line-height:1;color:var(--accent);margin:8px 0 4px}
+  .hint{margin-top:14px;font-size:11px;letter-spacing:.2em;color:#6f6479}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="index.html">
+    <span class="mark">A</span>
+    <span>← 回到 ARCADE</span>
+  </a>
+  <div class="hud">
+    <div class="hud__item"><span class="hud__num" id="score">0</span><span class="hud__label">得分</span></div>
+    <div class="hud__item"><span class="hud__num" id="best">0</span><span class="hud__label">最高</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <canvas id="cv"></canvas>
+
+  <div class="veil" id="veilStart">
+    <div>
+      <h1>Loop</h1>
+      <p>你控制左边那个点，右边那个点永远做你的镜像。<br />吃到光点得分，别碰漂过来的方块。</p>
+      <p style="margin-top:12px">
+        <span class="key">↑</span><span class="key">↓</span><span class="key">←</span><span class="key">→</span>
+        或 <span class="key">WASD</span>，手机上直接拖动
+      </p>
+      <button class="btn" id="btnStart">开始</button>
+      <div class="hint">按 空格 也能开始</div>
+    </div>
+  </div>
+
+  <div class="veil is-hidden" id="veilOver">
+    <div>
+      <h1>被追上了</h1>
+      <div class="final" id="finalScore">0</div>
+      <p>再来一次？速度会一点点变快。</p>
+      <button class="btn" id="btnRetry">重来</button>
+      <div class="hint">按 空格 重来</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Loop —— 镜像双点小游戏
+   机制：两个点关于中轴镜像，你动一个，另一个跟着动。
+        中轴上有来回漂移的方块，两侧镜像出现。
+        吃到光点得分。越往后漂移越快。
+   ============================================================ */
+(function () {
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const $score = document.getElementById('score');
+  const $best = document.getElementById('best');
+  const veilStart = document.getElementById('veilStart');
+  const veilOver = document.getElementById('veilOver');
+  const $final = document.getElementById('finalScore');
+
+  let W = 0, H = 0, dpr = 1;
+  let state = 'idle';          // idle | play | over
+  let score = 0;
+  let best = Number(localStorage.getItem('loop-best') || 0);
+  $best.textContent = best;
+
+  // 玩家：只记左半边的位置，右半边由镜像算出
+  const player = { x: 0, y: 0, r: 13, vx: 0, vy: 0 };
+  const ACC = 2600;            // 加速度
+  const MAXV = 520;            // 最大速度
+  const DAMP = 0.86;           // 阻尼
+
+  const keys = Object.create(null);
+  let pointerTarget = null;    // 手机拖动的目标点（左半边坐标）
+
+  let orbs = [];
+  let blocks = [];
+  let t = 0;
+  let speedMul = 1;
+
+  /* ---------------- 尺寸 ---------------- */
+  function resize() {
+    const r = cv.parentElement.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = r.width; H = r.height;
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    clampPlayer();
+  }
+
+  const axisX = () => W / 2;           // 镜像中轴
+  const pad = () => Math.max(16, W * 0.03);
+
+  function clampPlayer() {
+    const L = pad() + player.r;
+    const R = axisX() - player.r - pad() * 0.5;
+    player.x = Math.min(Math.max(player.x, L), R);
+    player.y = Math.min(Math.max(player.y, player.r + 60), H - player.r - 16);
+  }
+
+  /* ---------------- 光点 ---------------- */
+  function spawnOrb() {
+    const L = pad() + player.r + 8;
+    const R = axisX() - player.r - 12;
+    orbs.push({
+      x: L + Math.random() * (R - L),
+      y: 90 + Math.random() * (H - 150),
+      r: 7.5,
+      born: t,
+      pulse: Math.random() * 6.28,
+    });
+  }
+
+  /* ---------------- 方块 ---------------- */
+  function spawnBlock() {
+    const w = 34 + Math.random() * 46;
+    blocks.push({
+      // 从一侧漂向另一侧，穿过中轴；镜像后形成夹击
+      x: Math.random() < 0.5 ? -w : W + w,
+      y: 80 + Math.random() * (H - 130),
+      w,
+      h: 26 + Math.random() * 60,
+      vx: (Math.random() < 0.5 ? 1 : -1) * (60 + Math.random() * 90) * speedMul,
+    });
+  }
+
+  const gapX = (a, b) => Math.abs(a.x - b.x) < (a.r + b.w / 2) * 0.92;
+  const gapY = (a, b) => Math.abs(a.y - b.y) < (a.r + b.h / 2) * 0.92;
+
+  /* ---------------- 输入 ---------------- */
+  window.addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+    if (e.key === ' ') {
+      e.preventDefault();
+      if (state === 'idle') start();
+      else if (state === 'over') start();
+    }
+    if (['arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase())) e.preventDefault();
+  });
+  window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+  // 指针控制：在左半边任意处按下，点会朝那里移动
+  function pointerMove(e) {
+    const r = cv.getBoundingClientRect();
+    const px = e.clientX - r.left;
+    const py = e.clientY - r.top;
+    // 落在右半边就镜像回来，保证操作的是"左半边的点"
+    pointerTarget = { x: px > axisX() ? axisX() * 2 - px : px, y: py };
+  }
+  cv.addEventListener('pointerdown', (e) => {
+    if (state !== 'play') return;
+    cv.setPointerCapture?.(e.pointerId);
+    pointerMove(e);
+  });
+  cv.addEventListener('pointermove', (e) => {
+    if (state !== 'play') return;
+    if (e.buttons > 0 || e.pointerType === 'touch') pointerMove(e);
+  });
+  cv.addEventListener('pointerup', () => { pointerTarget = null; });
+  cv.addEventListener('pointercancel', () => { pointerTarget = null; });
+
+  /* ---------------- 流程 ---------------- */
+  function start() {
+    state = 'play';
+    score = 0; $score.textContent = '0';
+    t = 0; speedMul = 1;
+    orbs = []; blocks = [];
+    player.x = axisX() * 0.5 - 40;
+    player.y = H * 0.5;
+    player.vx = player.vy = 0;
+    pointerTarget = null;
+    spawnOrb();
+    veilStart.classList.add('is-hidden');
+    veilOver.classList.add('is-hidden');
+  }
+
+  function gameOver() {
+    state = 'over';
+    if (score > best) { best = score; localStorage.setItem('loop-best', best); $best.textContent = best; }
+    $final.textContent = score;
+    veilOver.classList.remove('is-hidden');
+  }
+
+  document.getElementById('btnStart').addEventListener('click', start);
+  document.getElementById('btnRetry').addEventListener('click', start);
+
+  /* ---------------- 主循环 ---------------- */
+  let last = performance.now();
+
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.032);
+    last = now;
+
+    if (state === 'play') update(dt);
+    draw();
+
+    requestAnimationFrame(frame);
+  }
+
+  function update(dt) {
+    t += dt;
+    speedMul = 1 + t * 0.035;             // 越玩越快
+
+    // --- 移动 ---
+    let ax = 0, ay = 0;
+    if (keys['arrowleft'] || keys['a']) ax -= 1;
+    if (keys['arrowright'] || keys['d']) ax += 1;
+    if (keys['arrowup'] || keys['w']) ay -= 1;
+    if (keys['arrowdown'] || keys['s']) ay += 1;
+
+    if (ax || ay) {
+      const m = Math.hypot(ax, ay) || 1;
+      player.vx += (ax / m) * ACC * dt;
+      player.vy += (ay / m) * ACC * dt;
+      pointerTarget = null;
+    } else if (pointerTarget) {
+      // 朝指针方向加速
+      const dx = pointerTarget.x - player.x;
+      const dy = pointerTarget.y - player.y;
+      const d = Math.hypot(dx, dy);
+      if (d > 4) {
+        player.vx += (dx / d) * ACC * dt;
+        player.vy += (dy / d) * ACC * dt;
+      }
+    }
+
+    const damp = Math.pow(DAMP, dt * 60);
+    player.vx *= damp; player.vy *= damp;
+
+    const sp = Math.hypot(player.vx, player.vy);
+    if (sp > MAXV) { player.vx = (player.vx / sp) * MAXV; player.vy = (player.vy / sp) * MAXV; }
+
+    player.x += player.vx * dt;
+    player.y += player.vy * dt;
+
+    // 撞墙
+    const L = pad() + player.r;
+    const R = axisX() - player.r - pad() * 0.5;
+    if (player.x < L) { player.x = L; player.vx = Math.abs(player.vx) * 0.4; }
+    if (player.x > R) { player.x = R; player.vx = -Math.abs(player.vx) * 0.4; }
+    if (player.y < player.r + 60) { player.y = player.r + 60; player.vy = Math.abs(player.vy) * 0.4; }
+    if (player.y > H - player.r - 16) { player.y = H - player.r - 16; player.vy = -Math.abs(player.vy) * 0.4; }
+
+    // --- 光点 ---
+    // 只记一个：吃到就换位置
+    orbs.forEach((o) => { o.pulse += dt * 3.4; });
+    for (let i = orbs.length - 1; i >= 0; i--) {
+      const o = orbs[i];
+      if (Math.hypot(o.x - player.x, o.y - player.y) < o.r + player.r) {
+        orbs.splice(i, 1);
+        score++; $score.textContent = score;
+        spawnOrb();
+        // 每 3 分放一个方块，制造压力
+        if (score % 3 === 0) spawnBlock();
+      }
+    }
+    if (orbs.length === 0) spawnOrb();
+    if (blocks.length === 0 && t > 4) spawnBlock();
+
+    // --- 方块 ---
+    for (let i = blocks.length - 1; i >= 0; i--) {
+      const b = blocks[i];
+      b.x += b.vx * dt;
+      // 镜像那一侧也要算：用镜像矩形做碰撞
+      const mirror = { x: axisX() * 2 - b.x, y: b.y, w: b.w, h: b.h };
+
+      const hitL = gapX({ x: player.x, r: player.r }, b) && gapY({ y: player.y, r: player.r }, b);
+      const hitR = gapX({ x: player.x, r: player.r }, mirror) && gapY({ y: player.y, r: player.r }, mirror);
+      if (hitL || hitR) { gameOver(); return; }
+
+      // 出界就销毁
+      if (b.x < -b.w * 2.5 || b.x > W + b.w * 2.5) blocks.splice(i, 1);
+    }
+
+    // 方块数量上限，避免堆积
+    if (blocks.length > 7) blocks.splice(0, blocks.length - 7);
+  }
+
+  /* ---------------- 绘制 ---------------- */
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function draw() {
+    // 背景
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#17111c';
+    ctx.fillRect(0, 0, W, H);
+
+    // 中轴辉光
+    const ax = axisX();
+    const g = ctx.createLinearGradient(ax - 90, 0, ax + 90, 0);
+    g.addColorStop(0, 'rgba(212,143,255,0)');
+    g.addColorStop(0.5, 'rgba(212,143,255,0.14)');
+    g.addColorStop(1, 'rgba(212,143,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(ax - 90, 0, 180, H);
+
+    // 中轴线
+    ctx.strokeStyle = '#ffffff1a';
+    ctx.setLineDash([5, 7]);
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(ax, 0); ctx.lineTo(ax, H); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 方块（含镜像）
+    for (const b of blocks) {
+      for (const bx of [b.x, ax * 2 - b.x]) {
+        ctx.fillStyle = 'rgba(122,51,80,0.92)';
+        roundRect(bx - b.w / 2, b.y - b.h / 2, b.w, b.h, 7);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,205,255,0.16)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    // 光点（含镜像）
+    for (const o of orbs) {
+      const pulse = 1 + Math.sin(o.pulse) * 0.16;
+      for (const ox of [o.x, ax * 2 - o.x]) {
+        ctx.beginPath();
+        ctx.arc(ox, o.y, o.r * pulse, 0, 6.283);
+        ctx.fillStyle = 'rgba(255,205,255,0.22)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(ox, o.y, o.r * 0.55, 0, 6.283);
+        ctx.fillStyle = '#ffcdff';
+        ctx.fill();
+      }
+    }
+
+    // 玩家（含镜像）
+    const px = [player.x, ax * 2 - player.x];
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,205,255,0.55)';
+    ctx.shadowBlur = 18;
+    px.forEach((x) => {
+      ctx.beginPath();
+      ctx.arc(x, player.y, player.r, 0, 6.283);
+      const pg = ctx.createLinearGradient(x - player.r, player.y - player.r, x + player.r, player.y + player.r);
+      pg.addColorStop(0, '#ffcdff');
+      pg.addColorStop(1, '#d48fff');
+      ctx.fillStyle = pg;
+      ctx.fill();
+    });
+    ctx.restore();
+
+    // 镜像说明线：把两点连起来，一眼看懂"它们是同一个你"
+    ctx.strokeStyle = 'rgba(255,205,255,0.18)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(px[0], player.y);
+    ctx.lineTo(px[1], player.y);
+    ctx.stroke();
+  }
+
+  /* ---------------- 启动 ---------------- */
+  window.addEventListener('resize', () => { resize(); });
+  resize();
+  player.x = axisX() * 0.5 - 40;
+  player.y = H * 0.5;
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

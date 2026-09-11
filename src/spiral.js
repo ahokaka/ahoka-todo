@@ -37,7 +37,7 @@ if (!stage || !host || !dataEl) {
 const CARDS = JSON.parse(dataEl.textContent);
 const N = CARDS.length;
 const cover = new Image();
-cover.src = new URL('../public/home/minesweeper.png', import.meta.url).href;
+cover.src = new URL('../public/home/minesweeper.png', import.meta.url).href + '?v=3';
 
 /* ---------------- 参数 ----------------
    P 里保留原版的参考值（对照用）。

@@ -1,17 +1,72 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./assets/favicon-HV1kWBx1.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lumora — Clarity in a Noisy Universe</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="./assets/index-D8HMynTJ.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DBiPJl6I.css">
-  </head>
-  <body class="bg-black text-white antialiased selection:bg-purple-500/30">
-    <div id="root"></div>
-  </body>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090909" />
+  <meta name="description" content="Anton's Arcade — 把随手冒出来的念头，做成可以玩的小游戏。来一局经典扫雷，不用下载，不用登录。" />
+  <title>Anton's Arcade — Make time to play.</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon-HV1kWBx1.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" crossorigin href="./assets/index-pAkTDi5z.css">
+</head>
+<body id="top">
+  <a class="skip-link" href="#games">跳到游戏</a>
+  <header class="header">
+    <a class="brand" href="#top" aria-label="Anton's Arcade 首页">ANTON’S<span>ARCADE</span></a>
+    <p class="header-note">Small games. A little curiosity.<br />Made in the evenings.</p>
+    <nav aria-label="主导航">
+      <a class="about-link" href="#about">关于这里</a>
+      <a class="pill" href="#games">挑一张，开玩 <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <h1 id="hero-title">MAKE TIME TO PLAY.</h1>
+      <div class="card-stage" id="games">
+        <div class="patterns" aria-hidden="true">
+          <img class="pattern p1" src="./home/tempers.webp" alt="" width="220" height="285" />
+          <img class="pattern p2" src="./home/keepers-of-time.webp" alt="" width="220" height="285" />
+          <img class="pattern p3" src="./home/brotherhood-of-tale.webp" alt="" width="220" height="285" />
+          <img class="pattern p4" src="./home/keepers-of-time.webp" alt="" width="220" height="285" />
+          <img class="pattern p5" src="./home/brotherhood-of-tale.webp" alt="" width="220" height="285" />
+          <img class="pattern p6" src="./home/tempers.webp" alt="" width="220" height="285" />
+        </div>
+        <a class="story-card floating" href="#about">
+          <span class="card-kicker">A SMALL PERSONAL ARCADE <span>02</span></span>
+          <h2>把随手冒出来<br />的念头，<br />做成游戏。</h2>
+          <p>有些想法，值得点开看看。<br />这里收藏我做的小东西，<br />和那些「再来一局」的时刻。</p>
+          <span class="card-bottom">认识一下 <span class="round-arrow" aria-hidden="true">↗</span></span>
+        </a>
+        <a class="game-card floating" href="./minesweeper/index.html" aria-label="开始玩扫雷 Minesweeper">
+          <span class="card-kicker"><span class="available">现在可玩</span><span>NO. 001</span></span>
+          <div class="game-heading"><h2>Minesweeper</h2><span>扫雷</span></div>
+          <p class="game-description">熟悉的方格。全新的一局。<br />让直觉慢一点，让逻辑先走。</p>
+          <div class="game-preview"><img src="./home/minesweeper.png" alt="经典扫雷实机画面，已展开的数字方格" width="333" height="438" /></div>
+          <span class="game-tags">经典解谜 <span>·</span> 随机种子 <span>·</span> 纯逻辑</span>
+          <span class="card-bottom">来一局扫雷 <span class="round-arrow" aria-hidden="true">↗</span></span>
+        </a>
+      </div>
+        <div class="stage-caption"><span>一点好奇心，一点空闲时间。</span><span>不用下载，不用登录。</span></div>
+      <div class="hero-foot"><span>INDEPENDENT & PLAYFUL</span><a href="#about">往下看看 <span aria-hidden="true">↓</span></a><span>EST. 2026</span></div>
+    </section>
+    <section class="about" id="about" aria-labelledby="about-title">
+      <div class="section-label"><span>ABOUT THIS LITTLE CORNER</span><span>01 / 01</span></div>
+      <div class="about-body">
+        <h2 id="about-title">SMALL IDEAS.<br />REAL <em>JOY.</em></h2>
+        <div class="about-copy">
+          <span class="eyebrow">你好，这里是 Anton 的小游戏角落。</span>
+          <h3>白天写代码，<br />晚上写游戏。</h3>
+          <p>比起把点子留在待办清单里，我更喜欢把它做出来。这里的游戏都很小，打开浏览器，就能玩上一会儿。</p>
+          <p>先从一局扫雷开始。也许下一次回来，这里又会多一个新念头。</p>
+          <a class="text-link" href="https://github.com/ahokaka/ahoka-todo" target="_blank" rel="noopener noreferrer">在 GitHub 看看源码 <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="about-foot"><span>为好奇心留个位置。</span><a href="./minesweeper/index.html">ONE MORE GAME? <span aria-hidden="true">↗</span></a></div>
+    </section>
+  </main>
+  <footer><a class="footer-brand" href="#top">ANTON’S ARCADE</a><div><span>© 2026 · MADE IN THE EVENINGS</span><a href="https://github.com/ahokaka" target="_blank" rel="noopener noreferrer">GITHUB ↗</a><a href="#top">回到顶部 ↑</a></div></footer>
+</body>
 </html>

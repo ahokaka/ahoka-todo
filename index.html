@@ -1,67 +1,915 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#090909" />
-  <meta name="description" content="Anton's Arcade — 把随手冒出来的念头，做成可以玩的小游戏。来一局经典扫雷，不用下载，不用登录。" />
-  <title>Anton's Arcade — Make time to play.</title>
-  <link rel="icon" type="image/svg+xml" href="./assets/favicon-HV1kWBx1.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./src/home.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#090807" />
+<title>Planet Jumping — Anton's Arcade</title>
+<meta name="description" content="Planet Jumping — a single-page immersive space portal. Jump from Mars to Earth to Venus, then play Minesweeper." />
+<link rel="icon" type="image/svg+xml" href="./assets/favicon-HV1kWBx1.svg" />
+<style>
+/* ===================== fonts ===================== */
+@font-face{font-family:'SF Pro';font-weight:400;font-style:normal;font-display:swap;
+  src:local('SF Pro Text'),local('SF Pro Display'),local('SFProText-Regular'),local('Helvetica Neue')}
+@font-face{font-family:'SF Pro';font-weight:700;font-style:normal;font-display:swap;
+  src:local('SF Pro Text Bold'),local('SF Pro Display Bold'),local('SFProText-Bold'),local('Helvetica Neue Bold')}
+@font-face{font-family:'SF Pro Thin';font-weight:100;font-style:normal;font-display:swap;
+  src:local('SF Pro Thin'),local('SFPro-Thin'),local('SF Pro Display Thin'),local('Helvetica Neue UltraLight')}
+@font-face{font-family:'Aalto';font-weight:400;font-style:normal;font-display:swap;
+  src:local('Aalto'),local('Aalto Display')}
+
+/* ===================== base ===================== */
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+:root{font-family:'SF Pro',Arial,sans-serif;color:#fff;background:#090807;font-synthesis:none}
+.experience{position:relative;width:100%;height:100%;min-height:540px;overflow:hidden;background:#0a0908}
+.backgrounds,.background,.shade,.transition-layer,.transition-layer video{position:absolute;inset:0;width:100%;height:100%}
+.background{object-fit:cover;opacity:0;transition:opacity .8s ease}
+.background.is-visible{opacity:1}
+.shade{z-index:1;background:linear-gradient(to bottom,transparent 52%,rgba(0,0,0,.88) 100%);pointer-events:none}
+.chrome{position:absolute;z-index:4;transition:opacity .45s ease,filter .45s ease}
+.experience.is-transitioning .chrome{opacity:0;filter:blur(8px);pointer-events:none}
+
+/* ===================== header ===================== */
+.header{left:clamp(18px,1.95vw,28px);right:clamp(18px,1.95vw,28px);top:clamp(18px,3.1vh,28px);display:flex;justify-content:flex-end;align-items:center}
+.header-actions{display:flex;align-items:center;gap:10px}
+.lang{height:42px;padding:0 18px;border:1px solid rgba(255,255,255,.45);border-radius:999px;background:rgba(255,255,255,.1);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;cursor:pointer;font:700 13px/1 'SF Pro',Arial,sans-serif;letter-spacing:.06em;transition:background .25s ease,color .25s ease}
+.lang:hover{background:#fff;color:#000}
+.menu{height:42px;padding:0 20px;border:0;border-radius:999px;background:#fff;color:#000;cursor:pointer;font:700 14px/1 'SF Pro',Arial,sans-serif;letter-spacing:.02em;white-space:nowrap}
+.menu:hover{background:rgba(255,255,255,.86)}
+
+/* ===================== planet sidebar ===================== */
+.planet-list{left:clamp(18px,1.95vw,28px);top:50%;transform:translateY(-43%);display:flex;flex-direction:column;gap:6px;font-size:16px}
+.planet-item{display:flex;align-items:center;min-height:20px}
+.planet-item.active{font-size:18px;font-weight:700;gap:8px}
+.planet-item.active:before{content:'';width:16px;height:16px;border-radius:50%;background:#fff}
+
+/* ===================== portal ===================== */
+.portal-wrap{left:50%;top:50%;width:min(320px,31vw);transform:translate(-50%,-54%);perspective:none}
+.portal-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:16px;opacity:0}
+.portal-heading strong{font-size:18px;margin-left:8px}
+.portal{position:relative;display:block;width:100%;aspect-ratio:320/350;padding:0;overflow:visible;border:0;border-radius:90px;background:transparent;cursor:pointer;box-shadow:none;transform:none!important}
+.portal video,.portal img{visibility:hidden;position:absolute;width:1px;height:1px;pointer-events:none;opacity:0}
+.portal-canvas{position:fixed;inset:0;z-index:3;width:100%;height:100%;pointer-events:none}
+
+/* ===================== planet content ===================== */
+.planet-content{--title-shift:-32px;left:clamp(28px,4vw,58px);right:clamp(28px,3vw,44px);bottom:clamp(24px,3vh,30px);display:flex;justify-content:space-between;align-items:flex-end;gap:40px}
+.planet-content h1{font-family:Aalto,'Arial Narrow',sans-serif;font-size:clamp(128px,21.8vw,314px);font-weight:400;line-height:.72;margin:0 0 -.04em;letter-spacing:0;transform:translateX(var(--title-shift));opacity:0}
+html[lang="zh-CN"] .planet-content h1{font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;font-weight:700;font-size:clamp(84px,14.5vw,214px);line-height:.94;letter-spacing:.02em}
+.planet-content dl{width:min(447px,34vw);margin:0;font-size:16px}
+.fact{display:grid;grid-template-columns:138px 1fr;gap:18px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.48);opacity:0}
+.fact:last-child{border-bottom:0}
+.fact dt{font-weight:700}
+.fact dd{margin:0}
+/* hold the final state after the reveal stagger, so a language switch can
+   redraw the facts without leaving them transparent */
+.experience.is-revealed .planet-content h1{opacity:1;animation:none;transform:translateX(var(--title-shift));filter:none}
+.experience.is-revealed .planet-content .fact{opacity:1;animation:none;transform:none;filter:none}
+
+/* ===================== misc ===================== */
+.transition-layer{display:none}
+.scene-canvas{display:none}
+.loading{position:absolute;z-index:12;left:50%;bottom:30px;transform:translateX(-50%);opacity:0;font-size:12px;letter-spacing:.14em;text-transform:uppercase;text-align:center;transition:opacity .2s}
+.experience.is-loading .loading{opacity:.8}
+.experience.is-transitioning .header,.experience.is-transitioning .planet-list{opacity:1;filter:none;pointer-events:auto}
+.experience.is-transitioning .shade{opacity:1}
+.experience.is-committing .background{transition:none!important}
+
+/* ===================== preloader ===================== */
+.preloader{position:absolute;inset:0;z-index:20;background:#000;overflow:hidden}
+.preloader video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.preloader-shade{position:absolute;inset:auto 0 0;height:35%;background:linear-gradient(to bottom,transparent,#000)}
+.preloader.is-background{z-index:0}
+.preloader.is-background .preloader-shade{opacity:0}
+.floating-logo{position:fixed;z-index:22;left:50%;top:50%;width:59px;height:58px;transform:translate(-50%,-50%);will-change:left,top,width,height,transform;
+  transition:left 2s cubic-bezier(.16,1,.3,1),top 2s cubic-bezier(.16,1,.3,1),width 2s cubic-bezier(.16,1,.3,1),height 2s cubic-bezier(.16,1,.3,1),transform 2s cubic-bezier(.16,1,.3,1)}
+.floating-logo.is-docked{left:clamp(18px,1.95vw,28px);top:clamp(18px,3.1vh,28px);width:37px;height:36px;transform:none}
+.floating-logo.is-settled{z-index:5}
+.preloader-count{position:fixed;z-index:22;left:50%;bottom:clamp(22px,3.1vh,28px);display:flex;align-items:flex-end;gap:4px;transform:translateX(-50%);font-family:'SF Pro',Arial,sans-serif;line-height:1}
+.preloader-count>span:first-child{font-family:'SF Pro Thin','SF Pro',Arial,sans-serif;font-size:64px;font-weight:100}
+.preloader-count .percent{font-size:24px;padding-bottom:4px}
+.preloader-count.is-leaving{animation:preload-count-out .75s cubic-bezier(.22,1,.36,1) both}
+@keyframes preload-count-out{to{opacity:0;filter:blur(7px);transform:translate(-50%,-34px)}}
+body:not(.preload-complete) .custom-cursor{opacity:0!important}
+
+/* ===================== custom cursor ===================== */
+html,body,button,a,.portal{cursor:none!important}
+.custom-cursor{display:block;position:fixed;left:0;top:0;z-index:100;width:1px;height:1px;pointer-events:none;opacity:0;transition:opacity .2s ease}
+.cursor-dot,.cursor-orbit{position:absolute;left:0;top:0;border-radius:50%;transform:translate(-50%,-50%)}
+.cursor-dot{width:12px;height:12px;background:#fff}
+.cursor-orbit{width:36px;height:36px;border:1px solid #fff;background:rgba(255,255,255,.4);transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.custom-cursor.is-enter .cursor-orbit{transform:translate(-50%,-50%) scale(1.16)}
+.cursor-label{position:absolute;top:26px;left:0;transform:translateX(-50%) translateY(-4px);font:16px/1.2 'SF Pro',Arial,sans-serif;white-space:nowrap;opacity:0;transition:opacity .2s ease,transform .3s cubic-bezier(.22,1,.36,1)}
+.custom-cursor.is-enter .cursor-label{opacity:1;transform:translateX(-50%) translateY(0)}
+/* touch devices keep the native cursor and skip the floating one */
+@media(pointer:coarse){
+  html,body,button,a,.portal{cursor:auto!important}
+  .custom-cursor{display:none}
+}
+
+/* ===================== entrance / switch animations ===================== */
+body:not(.intro-ready) .header,body:not(.intro-ready) .planet-list,body:not(.intro-ready) .planet-content h1,body:not(.intro-ready) .planet-content .fact{opacity:0}
+.intro-ready .header{animation:reveal-down .9s cubic-bezier(.22,1,.36,1) .1s both}
+.intro-ready .planet-list{animation:reveal-side .9s cubic-bezier(.22,1,.36,1) .65s both}
+.content-revealing h1{animation:title-rise 1.05s cubic-bezier(.16,1,.3,1) both}
+.content-revealing .fact{animation:fact-rise .72s cubic-bezier(.22,1,.36,1) both}
+.content-revealing .fact:nth-child(1){animation-delay:.52s}
+.content-revealing .fact:nth-child(2){animation-delay:.68s}
+.content-revealing .fact:nth-child(3){animation-delay:.84s}
+.content-revealing .fact:nth-child(4){animation-delay:1s}
+.mask-revealing .portal-heading{animation:portal-caption .85s cubic-bezier(.22,1,.36,1) both}
+.planet-list.is-switching .planet-item{animation:menu-row .58s cubic-bezier(.22,1,.36,1) both}
+.planet-list.is-switching .planet-item:nth-child(1){animation-delay:.02s}
+.planet-list.is-switching .planet-item:nth-child(2){animation-delay:.05s}
+.planet-list.is-switching .planet-item:nth-child(3){animation-delay:.08s}
+.planet-list.is-switching .planet-item:nth-child(4){animation-delay:.11s}
+.planet-list.is-switching .planet-item:nth-child(5){animation-delay:.14s}
+.planet-list.is-switching .planet-item:nth-child(6){animation-delay:.17s}
+@keyframes title-rise{from{opacity:0;filter:blur(12px);transform:translate(var(--title-shift),42px)}to{opacity:1;filter:blur(0);transform:translate(var(--title-shift),0)}}
+.planet-list.is-switching .planet-item.active:before{animation:active-dot .55s cubic-bezier(.22,1,.36,1) .18s both}
+@keyframes reveal-down{from{opacity:0;filter:blur(8px);transform:translateY(-18px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
+@keyframes fact-rise{from{opacity:0;filter:blur(7px);transform:translateY(18px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
+@keyframes portal-caption{from{opacity:0;filter:blur(7px);transform:translateY(22px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
+@keyframes menu-row{from{opacity:.35;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes active-dot{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+
+/* ===================== responsive ===================== */
+@media(max-width:900px){
+  .portal-wrap{width:min(300px,48vw)}
+  .planet-content h1{font-size:clamp(105px,24vw,190px)}
+  html[lang="zh-CN"] .planet-content h1{font-size:clamp(72px,17vw,140px)}
+  .planet-content dl{width:43vw}
+  .fact{grid-template-columns:110px 1fr}
+  .planet-list{font-size:14px}
+  .planet-item.active{font-size:16px}
+}
+@media(max-width:640px){
+  .experience{min-height:600px}
+  .planet-list{display:none}
+  .header{left:14px;right:14px;top:14px}
+  .header-actions{gap:8px}
+  .lang,.menu{height:38px}
+  .lang{padding:0 14px;font-size:12px}
+  .menu{padding:0 16px;font-size:13px}
+  .portal-wrap{top:44%;width:min(260px,66vw)}
+  .planet-content{--title-shift:-10px;left:18px;right:18px;bottom:18px;display:block}
+  .planet-content h1{font-size:clamp(98px,30vw,160px);margin-bottom:20px}
+  html[lang="zh-CN"] .planet-content h1{font-size:clamp(64px,22vw,120px);margin-bottom:16px}
+  .planet-content dl{width:100%;font-size:13px}
+  .fact{grid-template-columns:92px 1fr;padding:5px 0}
+  .portal-heading{font-size:14px}
+  .portal-heading strong{font-size:16px}
+  .portal{border-radius:70px}
+  .loading{top:calc(50% + 34vw);bottom:auto;font-size:11px;letter-spacing:.1em}
+  .preloader-count>span:first-child{font-size:52px}
+  .preloader-count .percent{font-size:20px}
+}
+@media(max-width:380px){
+  .menu{padding:0 13px;font-size:12px}
+  .lang{padding:0 12px}
+  .planet-content h1{font-size:clamp(84px,28vw,120px)}
+}
+/* short landscape phones: keep the title clear of the portal */
+@media(max-height:560px) and (orientation:landscape){
+  .portal-wrap{top:50%;width:min(220px,26vw)}
+  .planet-content h1{font-size:clamp(64px,12vw,120px)}
+  .planet-content dl{font-size:12px}
+  .fact{grid-template-columns:86px 1fr;padding:3px 0}
+}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}.portal{transform:none!important}}
+
+/* ===================== arcade layer (Minesweeper) ===================== */
+.arcade{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:clamp(14px,3vw,36px);background:rgba(6,5,4,.86);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);opacity:0;visibility:hidden;transition:opacity .4s ease,visibility .4s ease}
+.arcade.is-open{opacity:1;visibility:visible}
+.arcade-panel{display:flex;flex-direction:column;width:min(96vw,1040px);height:min(90vh,880px);border:1px solid rgba(255,255,255,.3);border-radius:22px;background:rgba(11,10,9,.94);overflow:hidden;transform:translateY(16px) scale(.985);transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.arcade.is-open .arcade-panel{transform:none}
+.arcade-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 14px 13px 22px;border-bottom:1px solid rgba(255,255,255,.18);font-size:14px;letter-spacing:.05em}
+.arcade-title{display:flex;align-items:center;gap:10px}
+.arcade-actions{display:flex;align-items:center;gap:10px}
+.arcade-close{display:grid;place-items:center;width:38px;height:38px;border:0;border-radius:50%;background:#fff;color:#000;font-size:14px;cursor:pointer;transition:transform .3s ease,background .25s ease}
+.arcade-close:hover{background:rgba(255,255,255,.86);transform:rotate(90deg)}
+.arcade-frame{flex:1;width:100%;border:0;background:transparent}
+body.arcade-open,body.arcade-open *{cursor:auto!important}
+body.arcade-open .custom-cursor{opacity:0!important}
+@media(max-width:640px){
+  .arcade{padding:8px}
+  .arcade-panel{width:100%;height:min(94vh,900px);border-radius:16px}
+  .arcade-head{padding:10px 10px 10px 14px;font-size:12px;gap:8px}
+  .arcade-close{width:34px;height:34px}
+}
+</style>
 </head>
-<body id="top">
-  <a class="skip-link" href="#games">跳到游戏</a>
-  <header class="header">
-    <a class="brand" href="#top" aria-label="Anton's Arcade 首页">ANTON’S<span>ARCADE</span></a>
-    <p class="header-note">Small games. A little curiosity.<br />Made in the evenings.</p>
-    <nav aria-label="主导航">
-      <a class="about-link" href="#about">关于这里</a>
-      <a class="pill" href="#games">挑一张，开玩 <span aria-hidden="true">↗</span></a>
-    </nav>
+<body>
+<main class="experience" data-planet="mars">
+  <div class="backgrounds" aria-hidden="true">
+    <video id="mars-background" class="background is-visible" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/3c83091e-4046-4fd6-adbb-2edb728be79a.mp4" muted playsinline preload="auto"></video>
+    <video id="earth-background" class="background" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/fc3ded42-e845-41f3-a830-5cab512d79cd.mp4" muted playsinline preload="auto"></video>
+    <video id="venus-background" class="background" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/b30f64d9-1637-477a-83df-d0fc6461a422.mp4" muted playsinline preload="auto"></video>
+  </div>
+
+  <div class="preloader" id="preloader" aria-label="Loading Mars">
+    <video id="preloader-video" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/5fc5651c-3b5d-4171-b507-87f7e635d1b4.mp4" muted playsinline preload="auto"></video>
+    <div class="preloader-shade"></div>
+  </div>
+
+  <img class="floating-logo" id="floating-logo" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/eb7e0f53-50cd-4af5-abc4-8b9a52cdc01b.svg" alt="Ubernatural" />
+
+  <div class="preloader-count" id="preloader-count" aria-live="polite">
+    <span id="preloader-value">0</span><span class="percent">%</span>
+  </div>
+
+  <canvas id="scene-canvas" class="scene-canvas" aria-hidden="true"></canvas>
+  <div class="shade" aria-hidden="true"></div>
+
+  <header class="header chrome">
+    <div class="header-actions">
+      <button class="lang" type="button" id="lang-toggle" data-i18n-aria="lang.aria">中文</button>
+      <button class="menu" type="button" id="menu" data-i18n="menu.play">Play Minesweeper</button>
+    </div>
   </header>
-  <main>
-    <section class="hero spiral-stage" id="stage" aria-labelledby="hero-title">
-      <h1 id="hero-title">MAKE TIME TO PLAY.</h1>
-      <div class="stage__gl" id="stageGL" aria-hidden="true"></div>
-      <canvas class="stage__mask" id="stageMask" aria-hidden="true"></canvas>
-      <div class="stage__hit" id="stageHit" aria-hidden="true"></div>
-      <div class="spiral-toolbar">
-        <span>拖动旋转 · 点击扫雷卡片开玩</span>
-        <button type="button" id="motionToggle" aria-pressed="false">暂停旋转</button>
-        <a href="#games">查看游戏 ↓</a>
+
+  <aside class="planet-list chrome" aria-label="Planets"></aside>
+
+  <canvas id="portal-canvas" class="portal-canvas" aria-hidden="true"></canvas>
+  <section class="portal-wrap chrome" aria-label="Next destination">
+    <div class="portal-heading">
+      <span data-i18n="next.label">Next:</span>
+      <span><span id="next-number">[03]</span> <strong id="next-name">Earth</strong></span>
+    </div>
+    <button class="portal" id="portal" type="button" aria-label="Travel to Earth">
+      <video id="portal-video" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/fc3ded42-e845-41f3-a830-5cab512d79cd.mp4" muted playsinline preload="auto"></video>
+      <img id="portal-image" src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/d6fb8b6b-c15e-4aaa-9cf7-45bbb5e33372.jpg" alt="Mercury" />
+    </button>
+  </section>
+
+  <section class="planet-content chrome" aria-live="polite">
+    <h1 id="planet-title">MARS</h1>
+    <dl id="facts"></dl>
+  </section>
+
+  <div class="transition-layer" aria-hidden="true"><video id="transition-video" muted playsinline preload="auto"></video></div>
+  <div class="loading" aria-hidden="true" data-i18n="loading">Preparing orbit…</div>
+  <div class="custom-cursor" aria-hidden="true">
+    <span class="cursor-orbit"></span><span class="cursor-dot"></span><span class="cursor-label" data-i18n="cursor.enter">Enter</span>
+  </div>
+</main>
+
+<!-- Arcade layer: Minesweeper, restyled to match and embedded in place -->
+<div class="arcade" id="arcade" aria-hidden="true">
+  <div class="arcade-panel" role="dialog" aria-modal="true" aria-label="Minesweeper">
+    <div class="arcade-head">
+      <span class="arcade-title" data-i18n="arcade.title">NO. 001 · MINESWEEPER</span>
+      <div class="arcade-actions">
+        <button class="arcade-close" type="button" id="arcade-close" data-i18n-aria="arcade.close" aria-label="Close">✕</button>
       </div>
-    </section>
-    <section id="games" class="games" aria-labelledby="games-title">
-      <div class="games-intro"><span class="eyebrow">PICK A CARD. TAKE A BREAK.</span><h2 id="games-title">一点好奇心，<br />一局小游戏。</h2><p>不用下载，不用登录。<br />从熟悉的方格，开始新的一局。</p></div>
-        <a class="game-card" href="./minesweeper/index.html" aria-label="开始玩扫雷 Minesweeper">
-          <span class="card-kicker"><span class="available">现在可玩</span><span>NO. 001</span></span>
-          <div class="game-heading"><h2>Minesweeper</h2><span>扫雷</span></div>
-          <p class="game-description">熟悉的方格。全新的一局。<br />让直觉慢一点，让逻辑先走。</p>
-          <div class="game-preview"><img src="./home/minesweeper.png?v=3" alt="黑粉配色的扫雷实机画面" width="247" height="366" /></div>
-          <span class="game-tags">经典解谜 <span>·</span> 随机种子 <span>·</span> 纯逻辑</span>
-          <span class="card-bottom">来一局扫雷 <span class="round-arrow" aria-hidden="true">↗</span></span>
-        </a>
-    </section>
-    <script type="application/json" id="spiralData">[{"title": "Bounce", "kick": "视觉实验 · Bounce", "mark": "⇡", "bg": "#8a98a8", "fg": "#3f4a57"}, {"title": "Type Rush", "kick": "视觉实验 · Type Rush", "mark": "⌨", "bg": "#b8923a", "fg": "#5a4418", "desc": "单词从四面八方涌来。敲得越快，世界越亮。"}, {"title": "Last Tower", "kick": "视觉实验 · Last Tower", "mark": "♜", "bg": "#a85f4a", "fg": "#f0dcd4"}, {"title": "Tide", "kick": "视觉实验 · Tide", "mark": "≈", "bg": "#6a8fa8", "fg": "#d4e4ef"}, {"title": "Fathom", "kick": "视觉实验 · Fathom", "mark": "◉", "bg": "#4a6a7a", "fg": "#cfe4ee"}, {"title": "Loop", "kick": "Loop · 可玩原型", "mark": "⌁", "bg": "#f2ddf7", "fg": "#7b2f9e", "desc": "你控制的是自己三秒前的影子。", "href": "./game.html"}, {"title": "Pulse", "kick": "视觉实验 · Pulse", "mark": "♪", "bg": "#a86a8a", "fg": "#4a2a3a", "desc": "没有轨道，没有音符，只有心跳。"}, {"title": "Drift", "kick": "视觉实验 · Drift", "mark": "◈", "bg": "#4a7a9e", "fg": "#bfe0f0"}, {"title": "Moss", "kick": "视觉实验 · Moss", "mark": "❖", "bg": "#7a8f6a", "fg": "#33402a"}, {"title": "Orbit", "kick": "视觉实验 · Orbit", "mark": "❋", "bg": "#8a6aa8", "fg": "#4a3560"}, {"title": "Lantern", "kick": "视觉实验 · Lantern", "mark": "☗", "bg": "#d9c94a", "fg": "#6b6320", "desc": "一盏灯，一条没人走过的路。"}, {"title": "Hollow", "kick": "视觉实验 · Hollow", "mark": "⌂", "bg": "#8a5f3a", "fg": "#3d2a1a"}, {"title": "Cinder", "kick": "视觉实验 · Cinder", "mark": "✳", "bg": "#b23a2a", "fg": "#f2e8d5"}, {"title": "Signal", "kick": "视觉实验 · Signal", "mark": "≡", "bg": "#5f7a6a", "fg": "#d8e8dd"}, {"title": "Prism", "kick": "视觉实验 · Prism", "mark": "⬡", "bg": "#c4b8d4", "fg": "#5a4a70"}, {"title": "Rust", "kick": "视觉实验 · Rust", "mark": "◐", "bg": "#a07a4a", "fg": "#3a2a14"}, {"title": "Minesweeper", "kick": "扫雷 · 现在可玩", "mark": "⚑", "bg": "#f2cdf8", "fg": "#382339", "desc": "熟悉的方格，全新的一局。", "href": "./minesweeper/index.html", "featured": true}, {"title": "Vertex", "kick": "视觉实验 · Vertex", "mark": "◭", "bg": "#7a8aa8", "fg": "#2f3a52"}, {"title": "Quartz", "kick": "视觉实验 · Quartz", "mark": "◫", "bg": "#b0a8c8", "fg": "#443a58"}, {"title": "Lumen", "kick": "视觉实验 · Lumen", "mark": "☀", "bg": "#b8a04a", "fg": "#4a3f14"}, {"title": "Basalt", "kick": "视觉实验 · Basalt", "mark": "◮", "bg": "#6a6a72", "fg": "#2a2a30"}, {"title": "Nectar", "kick": "视觉实验 · Nectar", "mark": "❂", "bg": "#a8804a", "fg": "#3f2c10"}, {"title": "Onyx", "kick": "视觉实验 · Onyx", "mark": "◇", "bg": "#7a7a8a", "fg": "#2f2f3a"}, {"title": "Solstice", "kick": "视觉实验 · Solstice", "mark": "◑", "bg": "#a87a5a", "fg": "#3a2410"}, {"title": "Halcyon", "kick": "视觉实验 · Halcyon", "mark": "◌", "bg": "#7a9aa8", "fg": "#2f4a54"}, {"title": "Verdant", "kick": "视觉实验 · Verdant", "mark": "❃", "bg": "#6a8a5a", "fg": "#2a3a20"}, {"title": "Marl", "kick": "视觉实验 · Marl", "mark": "◍", "bg": "#8a8478", "fg": "#3a342c"}, {"title": "Pyre", "kick": "视觉实验 · Pyre", "mark": "◈", "bg": "#a85a3a", "fg": "#f4e0d0"}, {"title": "Lattice", "kick": "视觉实验 · Lattice", "mark": "▦", "bg": "#7a8ab0", "fg": "#2a3450"}, {"title": "Dusk", "kick": "视觉实验 · Dusk", "mark": "◒", "bg": "#5a5a72", "fg": "#1f1f2a"}, {"title": "Tessera", "kick": "视觉实验 · Tessera", "mark": "▩", "bg": "#b0a090", "fg": "#443a30"}, {"title": "Harrow", "kick": "视觉实验 · Harrow", "mark": "✦", "bg": "#8a6a6a", "fg": "#3a2020"}, {"title": "Cobalt", "kick": "视觉实验 · Cobalt", "mark": "◘", "bg": "#4a5a9e", "fg": "#cfe0f4"}, {"title": "Sable", "kick": "视觉实验 · Sable", "mark": "◙", "bg": "#6a6a7a", "fg": "#26262f"}, {"title": "Aurum", "kick": "视觉实验 · Aurum", "mark": "◉", "bg": "#b8a04a", "fg": "#4a3a10"}, {"title": "Vessel", "kick": "视觉实验 · Vessel", "mark": "◬", "bg": "#8a7aa8", "fg": "#382c50"}, {"title": "Zenith", "kick": "视觉实验 · Zenith", "mark": "▲", "bg": "#a8927a", "fg": "#3a2e1c"}]</script>
-    <script type="module" src="/src/spiral.js"></script>
-    <section class="about" id="about" aria-labelledby="about-title">
-      <div class="section-label"><span>ABOUT THIS LITTLE CORNER</span><span>01 / 01</span></div>
-      <div class="about-body">
-        <h2 id="about-title">SMALL IDEAS.<br />REAL <em>JOY.</em></h2>
-        <div class="about-copy">
-          <span class="eyebrow">你好，这里是 Anton 的小游戏角落。</span>
-          <h3>白天写代码，<br />晚上写游戏。</h3>
-          <p>比起把点子留在待办清单里，我更喜欢把它做出来。这里的游戏都很小，打开浏览器，就能玩上一会儿。</p>
-          <p>先从一局扫雷开始。也许下一次回来，这里又会多一个新念头。</p>
-          <a class="text-link" href="https://github.com/ahokaka/ahoka-todo" target="_blank" rel="noopener noreferrer">在 GitHub 看看源码 <span aria-hidden="true">↗</span></a>
-        </div>
-      </div>
-      <div class="about-foot"><span>为好奇心留个位置。</span><a href="./minesweeper/index.html">ONE MORE GAME? <span aria-hidden="true">↗</span></a></div>
-    </section>
-  </main>
-  <footer><a class="footer-brand" href="#top">ANTON’S ARCADE</a><div><span>© 2026 · MADE IN THE EVENINGS</span><a href="https://github.com/ahokaka" target="_blank" rel="noopener noreferrer">GITHUB ↗</a><a href="#top">回到顶部 ↑</a></div></footer>
+    </div>
+    <iframe class="arcade-frame" id="arcade-frame" title="Minesweeper" data-src="./minesweeper/index.html?embed=1" loading="lazy" allow="autoplay"></iframe>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ===================== assets ===================== */
+  var BASE = 'https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P';
+  var TO_EARTH = BASE + '/fc3ded42-e845-41f3-a830-5cab512d79cd.mp4';
+  var TO_VENUS = BASE + '/b30f64d9-1637-477a-83df-d0fc6461a422.mp4';
+  var MERCURY = BASE + '/d6fb8b6b-c15e-4aaa-9cf7-45bbb5e33372.jpg';
+
+  /* ===================== data ===================== */
+  var planets = [
+    { en: 'Mercury', zh: '水星' }, { en: 'Venus', zh: '金星' },
+    { en: 'Earth', zh: '地球' }, { en: 'Mars', zh: '火星' },
+    { en: 'Jupiter', zh: '木星' }, { en: 'Saturn', zh: '土星' },
+    { en: 'Uranus', zh: '天王星' }, { en: 'Neptune', zh: '海王星' }
+  ];
+
+  var states = {
+    mars: {
+      name: 'Mars', nameCn: '火星', next: 'Earth', nextCn: '地球', number: '[03]',
+      portal: TO_EARTH, background: 'mars-background',
+      facts: [
+        ['Distance:', 'About 228 million km (1.5 astronomical units).'],
+        ['Year:', 'One Martian year is equal to 687 Earth days.'],
+        ['Temperature:', 'Around -60 °C, dropping to -125 °C at the poles in winter.'],
+        ['Atmosphere:', 'Very thin, consisting of 95% carbon dioxide, with frequent dust storms.']
+      ],
+      factsCn: [
+        ['距离：', '约 2.28 亿公里（1.5 个天文单位）。'],
+        ['公转周期：', '一个火星年等于 687 个地球日。'],
+        ['温度：', '约 -60 °C，冬季两极可降至 -125 °C。'],
+        ['大气：', '非常稀薄，95% 为二氧化碳，常有沙尘暴。']
+      ]
+    },
+    earth: {
+      name: 'Earth', nameCn: '地球', next: 'Venus', nextCn: '金星', number: '[02]',
+      portal: TO_VENUS, background: 'earth-background',
+      facts: [
+        ['Distance:', '149.6 million km from the Sun.'],
+        ['Year:', '365.25 Earth days.'],
+        ['Temperature:', 'Average surface temperature around 15 °C.'],
+        ['Atmosphere:', 'Mostly nitrogen and oxygen, supporting life and liquid water.']
+      ],
+      factsCn: [
+        ['距离：', '距太阳 1.496 亿公里。'],
+        ['公转周期：', '365.25 个地球日。'],
+        ['温度：', '地表平均温度约 15 °C。'],
+        ['大气：', '以氮和氧为主，支持生命与液态水。']
+      ]
+    },
+    venus: {
+      name: 'Venus', nameCn: '金星', next: 'Mercury', nextCn: '水星', number: '[06]',
+      image: MERCURY, background: 'venus-background',
+      facts: [
+        ['Distance:', '108.2 million km from the Sun.'],
+        ['Year:', '225 Earth days.'],
+        ['Temperature:', 'Around 465 °C — the hottest planet in the Solar System.'],
+        ['Atmosphere:', 'Extremely dense, mostly carbon dioxide, with clouds of sulfuric acid.']
+      ],
+      factsCn: [
+        ['距离：', '距太阳 1.082 亿公里。'],
+        ['公转周期：', '225 个地球日。'],
+        ['温度：', '约 465 °C —— 太阳系中最热的行星。'],
+        ['大气：', '极其浓密，主要为二氧化碳，并含有硫酸云。']
+      ]
+    }
+  };
+
+  var current = 'mars';
+
+  /* ===================== i18n ===================== */
+  var I18N = {
+    en: {
+      'doc.title': "Planet Jumping — Anton's Arcade",
+      'menu.play': 'Play Minesweeper',
+      'next.label': 'Next:',
+      'travel': 'Travel to {name}',
+      'loading': 'Preparing orbit…',
+      'cursor.enter': 'Enter',
+      'arcade.title': 'NO. 001 · MINESWEEPER',
+      'arcade.close': 'Close',
+      'arcade.iframe': 'Minesweeper',
+      'lang.aria': 'Switch to Chinese',
+      'loadingMars': 'Loading Mars'
+    },
+    zh: {
+      'doc.title': "星球跳跃 Planet Jumping — Anton's Arcade",
+      'menu.play': '玩扫雷',
+      'next.label': '下一站：',
+      'travel': '前往{name}',
+      'loading': '正在准备轨道…',
+      'cursor.enter': '进入',
+      'arcade.title': 'NO. 001 · 扫雷',
+      'arcade.close': '关闭',
+      'arcade.iframe': '扫雷',
+      'lang.aria': '切换到英文',
+      'loadingMars': '正在载入火星'
+    }
+  };
+
+  var STORAGE_KEY = 'anton-arcade-lang';
+
+  function readParam() {
+    try { return new URLSearchParams(window.location.search).get('lang'); } catch (e) { return null; }
+  }
+
+  function detectLang() {
+    var fromUrl = readParam();
+    if (fromUrl === 'zh' || fromUrl === 'en') return fromUrl;
+    try {
+      var saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved === 'zh' || saved === 'en') return saved;
+    } catch (e) { /* storage blocked */ }
+    var nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    return nav.indexOf('zh') === 0 ? 'zh' : 'en';
+  }
+
+  var lang = detectLang();
+
+  function t(key, vars) {
+    var table = I18N[lang] || I18N.en;
+    var text = table[key];
+    if (text === undefined) text = I18N.en[key];
+    if (text === undefined) return key;
+    if (vars) {
+      Object.keys(vars).forEach(function (name) {
+        text = text.replace(new RegExp('\\{' + name + '\\}', 'g'), vars[name]);
+      });
+    }
+    return text;
+  }
+
+  /* ===================== dom ===================== */
+  var exp = document.querySelector('.experience');
+  var titleEl = document.getElementById('planet-title');
+  var factsEl = document.getElementById('facts');
+  var nextNameEl = document.getElementById('next-name');
+  var nextNumberEl = document.getElementById('next-number');
+  var planetListEl = document.querySelector('.planet-list');
+  var portalBtn = document.getElementById('portal');
+  var portalVideo = document.getElementById('portal-video');
+  var portalImage = document.getElementById('portal-image');
+  var transitionVideo = document.getElementById('transition-video');
+  var preloader = document.getElementById('preloader');
+  var preloaderVideo = document.getElementById('preloader-video');
+  var preloaderCount = document.getElementById('preloader-count');
+  var preloaderValue = document.getElementById('preloader-value');
+  var logo = document.getElementById('floating-logo');
+  var cursorEl = document.querySelector('.custom-cursor');
+  var portalCanvas = document.getElementById('portal-canvas');
+  var sceneCanvas = document.getElementById('scene-canvas');
+  var pctx = portalCanvas.getContext('2d');
+  var sctx = sceneCanvas.getContext('2d');
+  var langBtn = document.getElementById('lang-toggle');
+  var menuBtn = document.getElementById('menu');
+
+  function applyStaticText() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) {
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-aria]'), function (el) {
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
+    document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    document.title = t('doc.title');
+    preloader.setAttribute('aria-label', t('loadingMars'));
+    document.getElementById('arcade-frame').setAttribute('title', t('arcade.iframe'));
+    langBtn.textContent = lang === 'zh' ? 'EN' : '中文';
+  }
+
+  /* ===================== canvas state ===================== */
+  var dpr = 1, vw = window.innerWidth, vh = window.innerHeight;
+  var tiltX = 0, tiltY = 0, rotX = 0, rotY = 0;
+  var busy = false, firstRender = true;
+  var expansion = 0, maskScale = 0, canvasOpacity = 1;
+  var transitionActive = false, frozenFrame = false;
+  var finePointer = window.matchMedia('(pointer:fine)').matches;
+
+  function easeInOutCubic(x) { return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+
+  function animateValue(setter, duration) {
+    return new Promise(function (resolve) {
+      var start = performance.now();
+      function step(now) {
+        var x = Math.min(1, (now - start) / duration);
+        setter(easeInOutCubic(x));
+        if (x < 1) requestAnimationFrame(step); else resolve();
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  function nextFrame() {
+    return new Promise(function (resolve) { requestAnimationFrame(function () { requestAnimationFrame(resolve); }); });
+  }
+
+  function resizeCanvas() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    vw = window.innerWidth;
+    vh = window.innerHeight;
+    portalCanvas.width = Math.round(vw * dpr);
+    portalCanvas.height = Math.round(vh * dpr);
+    portalCanvas.style.width = vw + 'px';
+    portalCanvas.style.height = vh + 'px';
+    pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!frozenFrame) {
+      sceneCanvas.width = Math.round(vw * dpr);
+      sceneCanvas.height = Math.round(vh * dpr);
+      sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+  }
+
+  function drawCover(ctx, media) {
+    if (!media) return;
+    var mw = media.videoWidth || media.naturalWidth || 0;
+    var mh = media.videoHeight || media.naturalHeight || 0;
+    if (!mw || !mh) return;
+    var scale = Math.max(vw / mw, vh / mh);
+    var w = mw * scale, h = mh * scale;
+    ctx.drawImage(media, (vw - w) / 2, (vh - h) / 2, w, h);
+  }
+
+  function drawShade(ctx) {
+    var g = ctx.createLinearGradient(0, vh * .52, 0, vh);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(1, 'rgba(0,0,0,.88)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, vh * .52, vw, vh * .48);
+  }
+
+  /* rounded-rect outline sampled as ~44 points, projected with fake perspective */
+  var FOCAL = 850;
+  function project(x, y, rx, ry, cx, cy) {
+    var ax = rx * Math.PI / 180;
+    var ay = ry * Math.PI / 180;
+    var xx = x * Math.cos(ay);
+    var yy = y * Math.cos(ax);
+    var z = x * Math.sin(ay) - y * Math.sin(ax);
+    var p = FOCAL / (FOCAL + z);
+    return [cx + xx * p, cy + yy * p];
+  }
+
+  function buildPath(ctx, cx, cy, w, h, r, rx, ry) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    var hw = w / 2, hh = h / 2;
+    var corners = [
+      [hw - r, -hh + r, -Math.PI / 2, 0],
+      [hw - r, hh - r, 0, Math.PI / 2],
+      [-hw + r, hh - r, Math.PI / 2, Math.PI],
+      [-hw + r, -hh + r, Math.PI, Math.PI * 1.5]
+    ];
+    var pts = [];
+    for (var c = 0; c < corners.length; c++) {
+      var corner = corners[c];
+      for (var s = 0; s <= 10; s++) {
+        var a = corner[2] + (corner[3] - corner[2]) * (s / 10);
+        pts.push([corner[0] + Math.cos(a) * r, corner[1] + Math.sin(a) * r]);
+      }
+    }
+    ctx.beginPath();
+    for (var i = 0; i < pts.length; i++) {
+      var p = project(pts[i][0], pts[i][1], rx, ry, cx, cy);
+      if (i === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
+    }
+    ctx.closePath();
+  }
+
+  function portalMedia() {
+    return states[current].image ? portalImage : portalVideo;
+  }
+
+  function isMediaReady(media) {
+    if (!media) return false;
+    if (media.tagName === 'IMG') return !!(media.complete && media.naturalWidth);
+    return media.readyState >= 3;
+  }
+
+  function waitForMedia(media, timeout) {
+    return new Promise(function (resolve) {
+      if (isMediaReady(media)) { resolve(); return; }
+      var done = false;
+      function finish() { if (done) return; done = true; resolve(); }
+      var event = media.tagName === 'IMG' ? 'load' : 'canplaythrough';
+      media.addEventListener(event, finish, { once: true });
+      media.addEventListener('error', finish, { once: true });
+      setTimeout(finish, timeout || 4000);
+    });
+  }
+
+  /* ===================== render ===================== */
+  function render() {
+    var state = states[current];
+    exp.dataset.planet = current;
+
+    titleEl.textContent = lang === 'zh' ? state.nameCn : state.name.toUpperCase();
+    nextNumberEl.textContent = state.number;
+    nextNameEl.textContent = lang === 'zh' ? state.nextCn : state.next;
+    portalBtn.setAttribute('aria-label', t('travel', { name: lang === 'zh' ? state.nextCn : state.next }));
+
+    var rows = lang === 'zh' ? state.factsCn : state.facts;
+    var factMarkup = '';
+    for (var i = 0; i < rows.length; i++) {
+      factMarkup += '<div class="fact"><dt>' + rows[i][0] + '</dt><dd>' + rows[i][1] + '</dd></div>';
+    }
+    factsEl.innerHTML = factMarkup;
+
+    var listMarkup = '';
+    for (var j = 0; j < planets.length; j++) {
+      var isActive = planets[j].en.toLowerCase() === current;
+      listMarkup += '<span class="planet-item' + (isActive ? ' active' : '') + '">' +
+        (lang === 'zh' ? planets[j].zh : planets[j].en) + '</span>';
+    }
+    planetListEl.innerHTML = listMarkup;
+
+    if (!firstRender) {
+      planetListEl.classList.remove('is-switching');
+      void planetListEl.offsetWidth;
+      planetListEl.classList.add('is-switching');
+    }
+    firstRender = false;
+
+    var backgrounds = document.querySelectorAll('.background');
+    for (var k = 0; k < backgrounds.length; k++) {
+      backgrounds[k].classList.toggle('is-visible', backgrounds[k].id === state.background);
+    }
+
+    if (state.image) {
+      portalImage.style.visibility = 'visible';
+      if (portalImage.getAttribute('src') !== state.image) portalImage.src = state.image;
+      portalVideo.style.visibility = 'hidden';
+      portalVideo.pause();
+    } else {
+      portalImage.style.visibility = 'hidden';
+      portalVideo.style.visibility = 'visible';
+      if (portalVideo.getAttribute('src') !== state.portal) portalVideo.src = state.portal;
+      var playing = portalVideo.play();
+      if (playing && playing.catch) playing.catch(function () {});
+    }
+  }
+
+  /* ===================== portal frame loop ===================== */
+  var lastTime = performance.now();
+
+  function draw(now) {
+    var dt = Math.min(40, now - lastTime);
+    lastTime = now;
+    rotX += (tiltX - rotX) * Math.min(1, dt * .009);
+    rotY += (tiltY - rotY) * Math.min(1, dt * .009);
+
+    pctx.clearRect(0, 0, vw, vh);
+    if (frozenFrame) {
+      pctx.drawImage(sceneCanvas, 0, 0, vw, vh);
+      drawShade(pctx);
+    }
+
+    var rect = portalBtn.getBoundingClientRect();
+    var e = expansion;
+    var rectCx = rect.left + rect.width / 2;
+    var rectCy = rect.top + rect.height / 2;
+    var cx = rectCx + (vw / 2 - rectCx) * e;
+    var cy = rectCy + (vh / 2 - rectCy) * e;
+    var baseW = rect.width + (vw - rect.width) * e;
+    var baseH = rect.height + (vh - rect.height) * e;
+    var scale = e ? 1 : maskScale;
+    var w = baseW * scale;
+    var h = baseH * scale;
+    var r = 90 * (1 - e) * scale;
+    var rx = rotX * (1 - e);
+    var ry = rotY * (1 - e);
+
+    if (w > 1 && h > 1) {
+      pctx.save();
+      pctx.globalAlpha = canvasOpacity;
+      buildPath(pctx, cx, cy, w, h, r, rx, ry);
+      pctx.clip();
+      pctx.fillStyle = '#030303';
+      pctx.fillRect(0, 0, vw, vh);
+      drawCover(pctx, transitionActive ? transitionVideo : portalMedia());
+      if (transitionActive) drawShade(pctx);
+      pctx.restore();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  /* ===================== tilt / cursor ===================== */
+  window.addEventListener('pointermove', function (e) {
+    if (busy || !finePointer) return;
+    tiltY = (e.clientX / vw - .5) * 37.4;
+    tiltX = (e.clientY / vh - .5) * -33;
+  });
+  window.addEventListener('pointerleave', function () { tiltX = 0; tiltY = 0; });
+
+  var mouseX = vw / 2, mouseY = vh / 2, cursorX = mouseX, cursorY = mouseY;
+  var cursorShown = false;
+
+  window.addEventListener('pointermove', function (e) {
+    if (!finePointer) return;
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (!cursorShown) {
+      cursorX = mouseX;
+      cursorY = mouseY;
+      cursorEl.classList.add('is-visible');
+      cursorShown = true;
+    }
+  });
+  document.addEventListener('mouseleave', function () {
+    cursorEl.classList.remove('is-visible');
+    cursorShown = false;
+  });
+  portalBtn.addEventListener('pointerenter', function () { cursorEl.classList.add('is-enter'); });
+  portalBtn.addEventListener('pointerleave', function () { cursorEl.classList.remove('is-enter'); });
+
+  function cursorLoop() {
+    cursorX += (mouseX - cursorX) * .2;
+    cursorY += (mouseY - cursorY) * .2;
+    cursorEl.style.transform = 'translate3d(' + cursorX + 'px,' + cursorY + 'px,0)';
+    requestAnimationFrame(cursorLoop);
+  }
+
+  /* ===================== travel ===================== */
+  function waitForEnd(video) {
+    return new Promise(function (resolve) {
+      var done = false;
+      function finish() { if (done) return; done = true; resolve(); }
+      video.addEventListener('ended', finish, { once: true });
+      video.addEventListener('error', finish, { once: true });
+    });
+  }
+
+  function revealMask() {
+    exp.classList.remove('mask-revealing');
+    void exp.offsetWidth;
+    exp.classList.add('mask-revealing');
+    maskScale = 0;
+    return animateValue(function (v) { maskScale = v; }, 1050);
+  }
+
+  function revealPlanetContent() {
+    exp.classList.remove('content-revealing', 'is-revealed');
+    void exp.offsetWidth;
+    exp.classList.add('content-revealing');
+    // Hold the finished state afterwards so a later language switch can redraw
+    // the facts without them fading back to invisible.
+    clearTimeout(revealPlanetContent.timer);
+    revealPlanetContent.timer = setTimeout(function () {
+      exp.classList.remove('content-revealing');
+      exp.classList.add('is-revealed');
+    }, 1700);
+  }
+
+  function releaseTransitionVideo() {
+    transitionVideo.removeAttribute('src');
+    transitionVideo.load();
+  }
+
+  function resetTransition() {
+    transitionActive = false;
+    expansion = 0;
+    maskScale = 1;
+    canvasOpacity = 1;
+    exp.classList.remove('is-loading', 'is-transitioning', 'is-committing');
+    busy = false;
+  }
+
+  function travel() {
+    if (busy || current === 'venus') return;
+    busy = true;
+    tiltX = 0;
+    tiltY = 0;
+    exp.classList.remove('is-revealed');
+
+    var next = current === 'mars' ? 'earth' : 'venus';
+    transitionVideo.src = states[current].portal;
+    transitionVideo.load();
+    exp.classList.add('is-loading');
+
+    Promise.race([
+      new Promise(function (r) { transitionVideo.addEventListener('canplaythrough', r, { once: true }); }),
+      new Promise(function (r) { transitionVideo.addEventListener('error', r, { once: true }); }),
+      new Promise(function (r) { setTimeout(r, 1600); })
+    ]).then(function () {
+      exp.classList.remove('is-loading', 'content-revealing', 'mask-revealing');
+      exp.classList.add('is-transitioning');
+      transitionVideo.currentTime = 0;
+      transitionVideo.playbackRate = 1.3;
+      canvasOpacity = 1;
+      transitionActive = true;
+      var p = transitionVideo.play();
+      return p && p.catch ? p.catch(function () {}) : Promise.resolve();
+    }).then(function () {
+      return animateValue(function (v) { expansion = v; }, 1100);
+    }).then(function () {
+      return waitForEnd(transitionVideo);
+    }).then(function () {
+      // freeze the last transition frame so the reveal is seamless
+      sctx.clearRect(0, 0, vw, vh);
+      drawCover(sctx, transitionVideo);
+      frozenFrame = true;
+
+      current = next;
+      exp.classList.add('is-committing');
+      render();
+      return nextFrame();
+    }).then(function () {
+      transitionActive = false;
+      expansion = 0;
+      maskScale = 0;
+      canvasOpacity = 1;
+      exp.classList.remove('is-transitioning', 'is-committing');
+
+      var maskReveal = revealMask();
+      setTimeout(revealPlanetContent, 100);
+      return maskReveal;
+    }).then(function () {
+      setTimeout(releaseTransitionVideo, 450);
+      busy = false;
+    }).catch(function () {
+      resetTransition();
+    });
+  }
+
+  /* ===================== preloader ===================== */
+  function startExperience() {
+    return waitForMedia(portalMedia(), 4000).then(function () {
+      return revealMask();
+    }).then(function () {
+      document.body.classList.add('intro-ready');
+      setTimeout(revealPlanetContent, 850);
+    });
+  }
+
+  function finishPreloader() {
+    if (finishPreloader.done) return;
+    finishPreloader.done = true;
+    preloaderValue.textContent = '100';
+    preloaderCount.classList.add('is-leaving');
+    logo.classList.add('is-docked');
+    preloader.classList.add('is-background');
+    document.body.classList.add('preload-complete');
+    startExperience();
+    setTimeout(function () { if (preloaderCount.parentNode) preloaderCount.parentNode.removeChild(preloaderCount); }, 750);
+    setTimeout(function () { logo.classList.add('is-settled'); }, 2000);
+  }
+
+  function runPreloader() {
+    preloaderVideo.addEventListener('loadedmetadata', function () {
+      // Spread the clip over roughly three seconds; guard against a missing or
+      // unbounded duration, which some streams report.
+      var duration = preloaderVideo.duration;
+      if (isFinite(duration) && duration > 0) {
+        preloaderVideo.playbackRate = Math.max(.25, duration / 3);
+      }
+      var p = preloaderVideo.play();
+      if (p && p.catch) p.catch(function () { finishPreloader(); });
+    }, { once: true });
+    preloaderVideo.addEventListener('ended', finishPreloader);
+    preloaderVideo.addEventListener('error', finishPreloader);
+
+    // The 'ended' event is not reliable for every codec/host combination, so the
+    // frame loop also completes the sequence once the clip has played through.
+    (function tick() {
+      if (finishPreloader.done) return;
+      var duration = preloaderVideo.duration;
+      if (duration) {
+        var progress = Math.min(1, preloaderVideo.currentTime / duration);
+        preloaderValue.textContent = String(Math.round(progress * 100));
+        if (preloaderVideo.ended || progress >= 1) { finishPreloader(); return; }
+      }
+      requestAnimationFrame(tick);
+    })();
+
+    // Hard guard: whatever happens to the media, the entrance must complete.
+    setTimeout(finishPreloader, 6000);
+  }
+
+  /* ===================== arcade layer ===================== */
+  var arcade = document.getElementById('arcade');
+  var arcadeFrame = document.getElementById('arcade-frame');
+  var arcadeClose = document.getElementById('arcade-close');
+
+  function frameSrc() {
+    return './minesweeper/index.html?embed=1&lang=' + lang;
+  }
+
+  function syncFrameLanguage() {
+    if (arcadeFrame.getAttribute('src')) arcadeFrame.setAttribute('src', frameSrc());
+  }
+
+  function openArcade() {
+    if (!arcadeFrame.getAttribute('src')) arcadeFrame.setAttribute('src', frameSrc());
+    arcade.classList.add('is-open');
+    arcade.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('arcade-open');
+    arcadeClose.focus();
+  }
+
+  function closeArcade() {
+    arcade.classList.remove('is-open');
+    arcade.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('arcade-open');
+    menuBtn.focus();
+  }
+
+  menuBtn.addEventListener('click', openArcade);
+  arcadeClose.addEventListener('click', closeArcade);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && arcade.classList.contains('is-open')) closeArcade();
+  });
+
+  /* ===================== language switch ===================== */
+  function setLang(next) {
+    if (next !== 'zh' && next !== 'en') return;
+    lang = next;
+    try { window.localStorage.setItem(STORAGE_KEY, next); } catch (e) { /* ignore */ }
+    applyStaticText();
+    render();
+    syncFrameLanguage();
+  }
+
+  langBtn.addEventListener('click', function () {
+    setLang(lang === 'zh' ? 'en' : 'zh');
+  });
+
+  /* ===================== boot ===================== */
+  portalBtn.addEventListener('click', travel);
+  window.addEventListener('resize', resizeCanvas);
+
+  var backgrounds = document.querySelectorAll('.background');
+  for (var i = 0; i < backgrounds.length; i++) {
+    backgrounds[i].pause();
+    try { backgrounds[i].currentTime = 0; } catch (err) { /* metadata not ready yet */ }
+  }
+
+  applyStaticText();
+  resizeCanvas();
+  render();
+  requestAnimationFrame(draw);
+  requestAnimationFrame(cursorLoop);
+  runPreloader();
+})();
+</script>
 </body>
 </html>

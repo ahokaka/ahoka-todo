@@ -4,6 +4,11 @@
 (function () {
   "use strict";
 
+  /* ------------------- i18n ------------------- */
+  // Strings live in i18n.js so the whole game can switch between
+  // English and Simplified Chinese at runtime. Falls back to the key name
+  // if the dictionary is unavailable (e.g. the file failed to load).
+  const t = (key, vars) => (window.MSI18N ? window.MSI18N.t(key, vars) : key);
   /* ------------------- Sound Engine (Web Audio) ------------------- */
   const Sound = (function () {
     let ctx = null;
@@ -452,7 +457,9 @@
     renderBoard();
     updateMineCounter();
 updateTimer();
-    statusTextEl.textContent = (Game.seed ? "Ready  ·  seed " + Game.seed : "Ready");
+    statusTextEl.textContent = Game.seed
+      ? t("status.readySeed", { seed: Game.seed })
+      : t("status.ready");
   }
 
 function renderBoard() {
@@ -463,7 +470,7 @@ for (let c = 0; c < Game.cols; c++) {
         const div = document.createElement("div");
         div.className = "cell covered";
         div.setAttribute("role", "gridcell");
-        div.setAttribute("aria-label", "row " + (r + 1) + ", column " + (c + 1));
+        div.setAttribute("aria-label", t("cell.aria", { r: r + 1, c: c + 1 }));
         div.dataset.r = r;
         div.dataset.c = c;
         boardEl.appendChild(div);
@@ -493,7 +500,7 @@ for (let c = 0; c < Game.cols; c++) {
       }
     }
     updateMineCounter();
-    statusTextEl.textContent = "No-guess board · seed " + Game.seed;
+    statusTextEl.textContent = t("status.noguess", { seed: Game.seed });
     syncSeedInput();
     // reveal the first click (it is guaranteed safe)
     revealAt(r, c);
@@ -651,13 +658,13 @@ for (let c = 0; c < Game.cols; c++) {
     if (won) {
       setFace("win");
       Sound.win();
-      statusTextEl.textContent = "You win! 🎉";
+      statusTextEl.textContent = t("status.win");
       showOverlay(true);
       autoFlagMines();
     } else {
       setFace("lose");
       Sound.boom();
-      statusTextEl.textContent = "Boom! You hit a mine.";
+      statusTextEl.textContent = t("status.lose");
       showOverlay(false);
     }
     updateMineCounter();
@@ -751,7 +758,7 @@ for (let c = 0; c < Game.cols; c++) {
       if (pauseEl) pauseEl.textContent = "▶";
       setFace("normal");
       statusTextEl.dataset.prev = statusTextEl.textContent;
-      statusTextEl.textContent = "⏸ Paused  ·  press P or ⏸ to resume";
+      statusTextEl.textContent = t("status.paused");
     } else {
       if (pauseOverlay) pauseOverlay.hidden = true;
       if (pauseEl) pauseEl.textContent = "⏸";
@@ -774,19 +781,18 @@ for (let c = 0; c < Game.cols; c++) {
     const ov = document.createElement("div");
     ov.className = "overlay";
     const head = document.createElement("h2");
-    head.textContent = won ? "🎉 You Win!" : "💥 Boom!";
+    head.textContent = won ? t("overlay.win") : t("overlay.lose");
     const p = document.createElement("p");
     p.textContent = won
-      ? "All safe squares revealed!"
-      : "You hit a mine. ";
+      ? t("overlay.winText")
+      : t("overlay.loseText");
     const btnRow = document.createElement("div");
     btnRow.className = "overlay-btns";
     const again = document.createElement("button");
-    again.textContent = "Play Again";
+    again.textContent = t("overlay.again");
     again.onclick = () => { ov.remove(); newGame(); };
     const close = document.createElement("button");
-    close.textContent = "Close";
-    close.onclick = () => ov.remove();
+    close.textContent = t("overlay.close");
     btnRow.appendChild(again);
     btnRow.appendChild(close);
     ov.appendChild(head);
@@ -841,19 +847,42 @@ for (let c = 0; c < Game.cols; c++) {
   }
 
   function showHelp() {
-    const msg = "Minesweeper\n\n" +
-      "Left-click to reveal a square.\n" +
-      "Right-click to flag (🚩), then question (?), then clear.\n" +
-      "Left-click a revealed number with the correct flags to 'chord'.\n\n" +
-      "🔒 NO-GUESS GUARANTEE:\n" +
-      "Every board is verified by a solver to be winnable using pure logic — you never have to guess.\n\n" +
-      "🧪 SEED SYSTEM:\n" +
-      "Enter a seed to reproduce the exact same board any time. Press 🎲 for a random seed.";
-    window.alert(msg);
+    window.alert(t("help.body"));
   }
 
   function showAbout() {
-    window.alert("Minesweeper — Windows Classic\n\nA full-featured web remake with sound effects, a verified no-guess guarantee, and a reproducible seed system.");
+    window.alert(t("about.body"));
+  }
+
+  // Re-apply the current language to everything the game renders itself.
+  // Called by i18n.js whenever the language changes.
+  function refreshText() {
+    if (Game.over) {
+      statusTextEl.textContent = Game.won ? t("status.win") : t("status.lose");
+    } else if (Game.paused) {
+      statusTextEl.textContent = t("status.paused");
+    } else if (Game.seed && Game.firstClickDone) {
+      statusTextEl.textContent = t("status.noguess", { seed: Game.seed });
+    } else {
+      statusTextEl.textContent = Game.seed
+        ? t("status.readySeed", { seed: Game.seed })
+        : t("status.ready");
+    }
+
+    const ov = document.querySelector(".overlay");
+    if (ov) {
+      const head = ov.querySelector("h2");
+      const body = ov.querySelector("p");
+      const buttons = ov.querySelectorAll(".overlay-btns button");
+      if (head) head.textContent = Game.won ? t("overlay.win") : t("overlay.lose");
+      if (body) body.textContent = Game.won ? t("overlay.winText") : t("overlay.loseText");
+      if (buttons[0]) buttons[0].textContent = t("overlay.again");
+      if (buttons[1]) buttons[1].textContent = t("overlay.close");
+    }
+
+    document.querySelectorAll(".cell").forEach((div) => {
+      div.setAttribute("aria-label", t("cell.aria", { r: +div.dataset.r + 1, c: +div.dataset.c + 1 }));
+    });
   }
 
   /* ------------------- Menus ------------------- */
@@ -980,7 +1009,7 @@ for (let c = 0; c < Game.cols; c++) {
   /* ------------------- Init ------------------- */
   window.addEventListener("error", (ev) => {
     const s = document.getElementById("statusText");
-    if (s) s.textContent = "Something went wrong: " + (ev.message || "unknown");
+    if (s) s.textContent = t("status.error", { msg: ev.message || "unknown" });
   });
 
   function init() {
@@ -991,7 +1020,7 @@ for (let c = 0; c < Game.cols; c++) {
   }
 
   window.Game = {
-    newGame, menuAction, resetBoard, init,
+    newGame, menuAction, resetBoard, init, refreshText,
     setSeed, makeRandomSeed, generateBoard, solveNoGuess
   };
 

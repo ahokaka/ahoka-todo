@@ -1,72 +1,133 @@
-:root{color-scheme:dark;--ink:#090909;--panel:#171419;--pink:#f2cdf8;--paper:#f1efe9;--muted:#b3a8b6;--line:#3b303f;--cell-size:32px}
+@font-face{font-family:'SF Pro';font-weight:400;font-style:normal;font-display:swap;
+  src:local('SF Pro Text'),local('SF Pro Display'),local('SFProText-Regular'),local('Helvetica Neue')}
+@font-face{font-family:'SF Pro';font-weight:700;font-style:normal;font-display:swap;
+  src:local('SF Pro Text Bold'),local('SF Pro Display Bold'),local('SFProText-Bold'),local('Helvetica Neue Bold')}
+
+:root{
+  color-scheme:dark;
+  --ink:#090807;
+  --paper:#fff;
+  --muted:rgba(255,255,255,.62);
+  --faint:rgba(255,255,255,.42);
+  --line:rgba(255,255,255,.2);
+  --line-strong:rgba(255,255,255,.45);
+  --glass:rgba(255,255,255,.08);
+  --glass-strong:rgba(255,255,255,.14);
+  --cell-size:32px;
+}
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%}
-body{background:var(--ink);color:var(--paper);font-family:Inter,'Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-button,input{font:inherit}
-button{cursor:pointer}
-button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
 [hidden]{display:none!important}
-.arcade-header{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:28px 4%;border-bottom:1px solid #ffffff12}
-.arcade-brand{color:var(--pink);font-size:18px;font-weight:800;letter-spacing:-.7px}
-.back-link{font-size:12px;color:var(--pink);border:1px solid #f2cdf84d;border-radius:30px;padding:10px 16px}
-.desktop{padding:38px 20px 28px;display:flex;flex-direction:column;align-items:center;gap:26px}
+html,body{margin:0;min-height:100%}
+body{
+  background:var(--ink);
+  background-image:radial-gradient(120% 80% at 50% 0%,#1b1815 0%,#0c0b0a 52%,#090807 100%);
+  background-attachment:fixed;
+  color:var(--paper);
+  font-family:'SF Pro','Helvetica Neue',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.arcade-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 4%;border-bottom:1px solid var(--line)}
+.arcade-brand{font-size:15px;font-weight:700;letter-spacing:.18em;white-space:nowrap}
+.header-actions{display:flex;align-items:center;gap:10px}
+.lang-btn{font-size:12px;letter-spacing:.08em;color:#fff;border:1px solid var(--line-strong);background:var(--glass);border-radius:999px;padding:10px 16px;transition:background .25s ease,color .25s ease}
+.lang-btn:hover{background:#fff;color:#000}
+.back-link{font-size:12px;letter-spacing:.08em;color:#fff;border:1px solid var(--line-strong);background:var(--glass);border-radius:999px;padding:10px 18px;transition:background .25s ease,color .25s ease;white-space:nowrap}
+.back-link:hover{background:#fff;color:#000}
+
 .game-intro{text-align:center}
-.game-intro>span{font-size:9px;letter-spacing:1.7px;color:var(--muted)}
-h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:76px;letter-spacing:-2px;line-height:1;margin:17px 0 12px}
-h1 span{font-family:Inter,sans-serif;font-size:13px;letter-spacing:2px;color:var(--pink);margin-left:18px}
-.game-intro p{font-size:12px;line-height:1.8;color:var(--muted);margin:0}
-.window{position:relative;width:max-content;min-width:370px;max-width:calc(100vw - 40px);background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 70px #0005}
-.titlebar{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:22px 24px 16px;color:var(--pink);font-size:9px;letter-spacing:1.4px}
-.game-badge{font-size:8px;color:var(--muted)}
+.game-intro>span{font-size:10px;letter-spacing:.22em;color:var(--faint);text-transform:uppercase}
+h1{display:flex;align-items:baseline;justify-content:center;gap:16px;flex-wrap:wrap;font-family:'Arial Narrow',Arial,sans-serif;font-weight:400;font-size:72px;letter-spacing:-1px;line-height:.92;margin:18px 0 12px}
+h1 .title-main{font:inherit}
+h1 .title-alt{font-family:'SF Pro','Helvetica Neue',Arial,sans-serif;font-size:13px;letter-spacing:.2em;color:var(--muted)}
+html[lang="zh-CN"] h1{font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;font-weight:700;font-size:60px;letter-spacing:.02em}
+html[lang="zh-CN"] h1 .title-alt{font-weight:400}
+.game-intro p{font-size:12.5px;line-height:1.8;color:var(--muted);margin:0}
+.window{position:relative;width:max-content;min-width:370px;max-width:calc(100vw - 40px);background:rgba(16,14,13,.72);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 90px rgba(0,0,0,.66),inset 0 1px 0 rgba(255,255,255,.07)}
+.titlebar{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:22px 24px 16px;font-size:10px;letter-spacing:.2em;color:var(--muted)}
+.game-badge{font-size:9px;color:var(--faint)}
 .menubar{display:flex;gap:8px;padding:0 18px 16px;border-bottom:1px solid var(--line)}
-.menu-btn{font-size:11px;color:var(--muted);background:transparent;border:1px solid transparent;border-radius:20px;padding:7px 13px}
-.menu-btn:hover,.menu-btn.active{background:var(--pink);color:#281b2b}
-.menu-popover{position:absolute;z-index:50;min-width:210px;padding:6px;background:#241d29;border:1px solid #70576f;border-radius:10px;box-shadow:0 12px 30px #0008}
-.menu-item{display:flex;justify-content:space-between;align-items:center;width:100%;gap:18px;padding:10px 12px;border:0;border-radius:6px;background:transparent;color:var(--paper);font-size:12px;text-align:left;white-space:nowrap}
-.menu-item:hover,.menu-item:focus-visible{background:var(--pink);color:#281b2b}
+.menu-btn{font-size:11px;letter-spacing:.08em;color:var(--muted);background:transparent;border:1px solid transparent;border-radius:999px;padding:7px 14px;transition:background .25s ease,color .25s ease}
+.menu-btn:hover,.menu-btn.active{background:#fff;color:#000}
+.menu-popover{position:absolute;z-index:50;min-width:210px;padding:6px;background:#171412;border:1px solid var(--line-strong);border-radius:12px;box-shadow:0 18px 44px rgba(0,0,0,.7)}
+.menu-item{display:flex;justify-content:space-between;align-items:center;width:100%;gap:18px;padding:10px 12px;border:0;border-radius:8px;background:transparent;color:var(--paper);font-size:12px;text-align:left;white-space:nowrap}
+.menu-item:hover,.menu-item:focus-visible{background:#fff;color:#000}
 .menu-sep{height:1px;margin:5px;background:var(--line)}
-.menu-short{color:var(--muted);font-size:10px}
-.menu-item:hover .menu-short{color:#57445b}
+.menu-short{color:var(--faint);font-size:10px}
+.menu-item:hover .menu-short{color:#5c5854}
 .menu-check{min-width:14px;text-align:center}
+
 .game-shell{padding:20px 24px 24px}
-.top-panel{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:22px}
-.counter{font-family:Consolas,monospace;font-variant-numeric:tabular-nums;font-size:26px;font-weight:400;color:var(--pink);min-width:60px;text-align:center;letter-spacing:-1px;line-height:1.2}
-.counter:before{display:block;font-family:Inter,sans-serif;font-size:8px;letter-spacing:1.4px;color:var(--muted);margin-bottom:7px}
-#mineCounter:before{content:'MINES'}
-#timerCounter:before{content:'TIME'}
+#mineCounter:before{content:attr(data-label)}
+#timerCounter:before{content:attr(data-label)}
+.counter:before{display:block;font-family:'SF Pro','Helvetica Neue',Arial,sans-serif;font-size:8px;letter-spacing:.2em;color:var(--faint);margin-bottom:7px}
 .top-center{display:flex;align-items:center;gap:8px}
-.face{display:grid;place-items:center;width:42px;height:42px;padding:0;background:#332639;border:1px solid #67506b;border-radius:50%;font-size:22px;color:var(--pink)}
-.face:hover{background:#4d3555;border-color:var(--pink)}
+.face{display:grid;place-items:center;width:42px;height:42px;padding:0;background:var(--glass-strong);border:1px solid var(--line-strong);border-radius:50%;font-size:22px;color:#fff;transition:background .25s ease,border-color .25s ease,transform .12s ease}
+.face:hover{background:#fff;border-color:#fff;color:#000}
 .face:active{transform:scale(.94)}
 .pause-btn{width:36px;height:36px;font-size:15px;background:transparent}
-.board-wrap{position:relative;width:max-content;max-width:100%;overflow:auto;margin:auto;border:1px solid var(--line);border-radius:7px}
-.board{display:grid;width:max-content;background:#241d29;padding:5px;gap:3px;user-select:none}
-.cell{width:var(--cell-size);height:var(--cell-size);display:flex;align-items:center;justify-content:center;border:1px solid #5d4965;border-radius:3px;background:#493752;font-family:Inter,sans-serif;font-size:14px;font-weight:700;line-height:1;cursor:pointer;transition:background .12s,transform .12s}
-.cell.covered:hover{background:#795785;border-color:var(--pink)}
-.cell.covered:active{transform:scale(.92);background:var(--pink)}
-.cell.revealed{background:#18141d;border-color:#33283a;cursor:default}
-.cell.flag{background:#66506e;border-color:#bc8ec8}
-.cell.question{color:var(--pink)}
-.cell.n1{color:#a8bfff}.cell.n2{color:#a9d9aa}.cell.n3{color:#ffacb5}.cell.n4{color:#c7b4ff}.cell.n5{color:#eaa985}.cell.n6{color:#99dfdf}.cell.n7{color:#f2cdf8}.cell.n8{color:#e2d9e7}
-.cell.mine{background:#59424e}.cell.explode,.cell.wrongflag{background:#a83856;border-color:#ff99b4;color:white}
-.pause-overlay{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:#171019ed;border-radius:6px}
-.pause-msg{font-family:'Instrument Serif',Georgia,serif;font-size:30px;font-weight:400;letter-spacing:1px;color:var(--pink)}
-.statusbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:10px;line-height:1.6;color:var(--muted);padding:14px 0}
-.status-hint{color:#bfaac5;white-space:nowrap}
+
+.board-wrap{position:relative;width:max-content;max-width:100%;overflow:auto;margin:auto;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.4)}
+.board{display:grid;width:max-content;background:rgba(0,0,0,.55);padding:5px;gap:3px;user-select:none}
+.cell{width:var(--cell-size);height:var(--cell-size);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.24);border-radius:4px;background:linear-gradient(180deg,#3a3531,#211e1c);font-family:'SF Pro','Helvetica Neue',Arial,sans-serif;font-size:14px;font-weight:700;line-height:1;cursor:pointer;transition:background .12s ease,transform .12s ease,border-color .12s ease}
+.cell.covered:hover{background:linear-gradient(180deg,#4a4440,#2b2724);border-color:#fff}
+.cell.covered:active{transform:scale(.92);background:#fff}
+.cell.revealed{background:rgba(0,0,0,.72);border-color:rgba(255,255,255,.12);cursor:default}
+.cell.flag{background:linear-gradient(180deg,#4a4440,#2b2724);border-color:rgba(255,255,255,.6)}
+.cell.question{color:#fff}
+.cell.n1{color:#fff}.cell.n2{color:#cfc7bd}.cell.n3{color:#e8a59a}.cell.n4{color:#c9b6ff}.cell.n5{color:#f0c48a}.cell.n6{color:#9fdcd6}.cell.n7{color:#fff}.cell.n8{color:#d8d2cb}
+.cell.mine{background:rgba(0,0,0,.8);border-color:rgba(255,255,255,.3)}
+.cell.explode,.cell.wrongflag{background:#fff;border-color:#fff;color:#000}
+.pause-overlay{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:rgba(9,8,7,.92);border-radius:6px}
+.pause-msg{font-size:24px;font-weight:700;letter-spacing:.24em}
+
+.statusbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:10.5px;line-height:1.6;color:var(--muted);padding:14px 0}
+.status-hint{color:var(--faint);white-space:nowrap}
 .seed-panel{display:flex;align-items:center;gap:7px;padding-top:16px;border-top:1px solid var(--line);font-size:11px}
-.seed-label{color:var(--muted)}
-.seed-input{flex:1;min-width:0;padding:9px 10px;background:#0e0b11;border:1px solid var(--line);border-radius:5px;color:var(--paper);font-family:Consolas,monospace;font-size:12px}
-.seed-btn{padding:9px 11px;border-radius:5px;border:1px solid #67506b;background:#332639;color:var(--pink);font-size:11px}
-.seed-btn:hover{background:var(--pink);color:#281b2b}
-.overlay{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;text-align:center;padding:30px;background:#151018f5;border-radius:15px}
-.overlay h2{font-family:'Instrument Serif',Georgia,serif;font-size:44px;font-weight:400;letter-spacing:-1px;color:var(--pink);margin:0}
+.seed-label{color:var(--faint);letter-spacing:.08em}
+.seed-input{flex:1;min-width:0;padding:9px 10px;background:rgba(0,0,0,.5);border:1px solid var(--line);border-radius:8px;color:var(--paper);font-family:'SF Mono',Consolas,monospace;font-size:12px}
+.seed-input:focus{border-color:var(--line-strong)}
+.seed-btn{padding:9px 12px;border-radius:999px;border:1px solid var(--line-strong);background:var(--glass);color:#fff;font-size:11px;transition:background .25s ease,color .25s ease}
+.seed-btn:hover{background:#fff;color:#000}
+
+.overlay{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;text-align:center;padding:30px;background:rgba(9,8,7,.95);border-radius:19px}
+.overlay h2{font-size:30px;font-weight:700;letter-spacing:-.5px;margin:0}
 .overlay p{font-size:13px;line-height:1.8;color:var(--muted);max-width:310px;margin:0}
 .overlay-btns{display:flex;gap:12px}
-.overlay-btns button{background:var(--pink);color:#281b2b;border:0;border-radius:30px;padding:12px 20px;font-size:12px}
-.toast{position:fixed;left:50%;bottom:24px;z-index:100;transform:translate(-50%,120px);opacity:0;background:var(--pink);color:#281b2b;border-radius:30px;padding:12px 20px;font-size:12px;box-shadow:0 8px 24px #0008;transition:opacity .2s,transform .2s;pointer-events:none}
-.toast.show{opacity:1;transform:translate(-50%,0)}
-.game-footnote{font-size:10px;line-height:1.8;color:var(--muted);text-align:center;margin:0}
-@media(max-width:480px){:root{--cell-size:clamp(24px,calc((100vw - 105px)/9),32px)}.arcade-header{padding:20px 5%}.arcade-brand{font-size:15px}.back-link{font-size:10px;padding:9px 12px}.desktop{padding:30px 12px;gap:22px}h1{font-size:56px}h1 span{font-size:11px;margin-left:10px}.window{min-width:0;width:calc(100vw - 24px);max-width:calc(100vw - 24px)}.titlebar{padding:20px 18px 12px}.game-shell{padding:18px 16px}.menubar{padding-bottom:12px}.counter{font-size:24px}.cell{font-size:13px}.statusbar{font-size:9px}.game-footnote{font-size:9px}}
+body.embed .arcade-header,body.embed .game-intro,body.embed .game-footnote{display:none}
+/* the arcade panel supplies its own header, so the inner title strip is redundant */
+body.embed .titlebar{display:none}
+body.embed .desktop{padding:12px;gap:0;min-height:100vh;justify-content:center}
+body.embed .window{min-width:0;width:max-content;max-width:100%;box-shadow:none;background:rgba(255,255,255,.04)}
+body.embed .board-wrap{max-height:calc(100vh - 240px)}
+body.embed .game-shell{padding:16px 20px 20px}
+
+@media(max-width:480px){
+  :root{--cell-size:clamp(22px,calc((100vw - 114px)/9),32px)}
+  .arcade-brand{font-size:11px;letter-spacing:.1em}
+  .header-actions{gap:7px}
+  .lang-btn{padding:8px 12px;font-size:11px}
+  .back-link{font-size:11px;padding:8px 12px}
+  .titlebar .game-badge{display:none}
+  .desktop{padding:24px 12px;gap:20px}
+  h1{font-size:46px}
+  h1 .title-alt{font-size:11px}
+  html[lang="zh-CN"] h1{font-size:40px}
+  .game-shell{padding:18px 16px}
+  .menubar{padding-bottom:12px}
+  .counter{font-size:24px}
+  .cell{font-size:13px}
+  .statusbar{font-size:9px}
+  .game-footnote{font-size:9px}
+}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
-@media(min-width:481px) and (max-height:850px){:root{--cell-size:28px}.arcade-header{padding:18px 4%}.desktop{padding:20px;gap:18px}h1{font-size:56px;margin:12px 0 8px}.titlebar{padding:18px 20px 12px}.menubar{padding-bottom:10px}.game-shell{padding:16px 20px 18px}.top-panel{padding-bottom:16px}.statusbar{padding:10px 0}.seed-panel{padding-top:12px}}
+@media(min-width:481px) and (max-height:880px){
+  :root{--cell-size:28px}
+  .arcade-header{padding:18px 4%}
+  .desktop{padding:20px;gap:18px}
+  h1{font-size:50px;margin:12px 0 8px}
+  html[lang="zh-CN"] h1{font-size:42px}
+  .game-shell{padding:16px 20px 18px}
+  .top-panel{padding-bottom:16px}
+  .statusbar{padding:10px 0}
+  .seed-panel{padding-top:12px}
+}

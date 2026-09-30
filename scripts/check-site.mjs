@@ -52,7 +52,24 @@ for (const [page, file] of [['homepage', home], ['game', game]]) {
 }
 assert(read('public/minesweeper/i18n.js').includes('zh: {'), 'Minesweeper i18n must ship Chinese strings');
 
-// 5. The removed spiral homepage must not come back.
+// 5. The custom cursor must never be able to leave the page pointer-less.
+//    The native cursor is hidden only under html.cursor-ready, which the JS
+//    adds after a real pointermove; the element needs its own show rule.
+const homeCss = home.slice(home.indexOf('<style>'), home.indexOf('</style>'));
+assert(homeCss.includes('.custom-cursor.is-visible{opacity:1}'),
+  'Homepage must keep the rule that actually shows the custom cursor');
+assert(homeCss.includes('html.cursor-ready'),
+  'Homepage must gate cursor:none behind html.cursor-ready');
+assert(!/^html,body,button,a,\.portal\{cursor:none/m.test(homeCss),
+  'Homepage must not hide the native cursor unconditionally');
+assert(home.includes('maybeReadyCursor'),
+  'Homepage must only hide the native cursor once the custom one is drawn');
+for (const frames of ['title-rise', 'fact-rise', 'reveal-down', 'reveal-side', 'active-dot']) {
+  assert(homeCss.includes(`@keyframes ${frames}`), `Homepage is missing @keyframes ${frames}`);
+}
+assert(!read('public/minesweeper/style.css').includes('cursor:none'),
+  'Minesweeper must keep a visible native cursor');
+// 6. The removed spiral homepage must not come back.
 assert(!existsSync(new URL('src', root)), 'src/ (old spiral homepage) should be gone');
 assert(!existsSync(new URL('public/home', root)), 'public/home (old card art) should be gone');
 

@@ -93,17 +93,24 @@ html[lang="zh-CN"] .planet-content h1{font-family:'PingFang SC','Hiragino Sans G
 body:not(.preload-complete) .custom-cursor{opacity:0!important}
 
 /* ===================== custom cursor ===================== */
-html,body,button,a,.portal{cursor:none!important}
+/* The native cursor is hidden ONLY once the custom one is genuinely on screen
+   (html.cursor-ready, added from JS after a real pointermove). If anything
+   stops the custom cursor from working, the real pointer stays visible. */
 .custom-cursor{display:block;position:fixed;left:0;top:0;z-index:100;width:1px;height:1px;pointer-events:none;opacity:0;transition:opacity .2s ease}
+/* the class the JS toggles on every pointermove — without this the cursor
+   element stays at opacity 0 and the page would have no pointer at all */
+.custom-cursor.is-visible{opacity:1}
 .cursor-dot,.cursor-orbit{position:absolute;left:0;top:0;border-radius:50%;transform:translate(-50%,-50%)}
-.cursor-dot{width:12px;height:12px;background:#fff}
-.cursor-orbit{width:36px;height:36px;border:1px solid #fff;background:rgba(255,255,255,.4);transition:transform .3s cubic-bezier(.22,1,.36,1)}
+/* a dark rim keeps the dot readable over both bright and dark footage */
+.cursor-dot{width:12px;height:12px;background:#fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.55),0 1px 8px rgba(0,0,0,.6)}
+.cursor-orbit{width:36px;height:36px;border:1px solid rgba(255,255,255,.95);background:rgba(255,255,255,.16);box-shadow:0 0 0 1px rgba(0,0,0,.45),0 2px 16px rgba(0,0,0,.45);transition:transform .3s cubic-bezier(.22,1,.36,1)}
 .custom-cursor.is-enter .cursor-orbit{transform:translate(-50%,-50%) scale(1.16)}
-.cursor-label{position:absolute;top:26px;left:0;transform:translateX(-50%) translateY(-4px);font:16px/1.2 'SF Pro',Arial,sans-serif;white-space:nowrap;opacity:0;transition:opacity .2s ease,transform .3s cubic-bezier(.22,1,.36,1)}
+.cursor-label{position:absolute;top:26px;left:0;transform:translateX(-50%) translateY(-4px);font:16px/1.2 'SF Pro',Arial,sans-serif;white-space:nowrap;opacity:0;color:#fff;text-shadow:0 1px 7px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,.95);transition:opacity .2s ease,transform .3s cubic-bezier(.22,1,.36,1)}
 .custom-cursor.is-enter .cursor-label{opacity:1;transform:translateX(-50%) translateY(0)}
+html.cursor-ready,html.cursor-ready body,html.cursor-ready button,html.cursor-ready a,html.cursor-ready .portal{cursor:none!important}
 /* touch devices keep the native cursor and skip the floating one */
 @media(pointer:coarse){
-  html,body,button,a,.portal{cursor:auto!important}
+  html.cursor-ready,html.cursor-ready body,html.cursor-ready button,html.cursor-ready a,html.cursor-ready .portal{cursor:auto!important}
   .custom-cursor{display:none}
 }
 
@@ -128,6 +135,7 @@ body:not(.intro-ready) .header,body:not(.intro-ready) .planet-list,body:not(.int
 @keyframes title-rise{from{opacity:0;filter:blur(12px);transform:translate(var(--title-shift),42px)}to{opacity:1;filter:blur(0);transform:translate(var(--title-shift),0)}}
 .planet-list.is-switching .planet-item.active:before{animation:active-dot .55s cubic-bezier(.22,1,.36,1) .18s both}
 @keyframes reveal-down{from{opacity:0;filter:blur(8px);transform:translateY(-18px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
+@keyframes reveal-side{from{opacity:0;filter:blur(8px);transform:translate(-20px,-43%)}to{opacity:1;filter:blur(0);transform:translate(0,-43%)}}
 @keyframes fact-rise{from{opacity:0;filter:blur(7px);transform:translateY(18px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
 @keyframes portal-caption{from{opacity:0;filter:blur(7px);transform:translateY(22px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
 @keyframes menu-row{from{opacity:.35;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
@@ -663,21 +671,35 @@ body.arcade-open .custom-cursor{opacity:0!important}
 
   var mouseX = vw / 2, mouseY = vh / 2, cursorX = mouseX, cursorY = mouseY;
   var cursorShown = false;
+  var hasMoved = false;
+
+  // Hide the native cursor only when the custom one is actually being drawn:
+  // fine pointer + a real pointermove + the intro finished. Until then the real
+  // system cursor stays visible, so the page can never end up pointer-less.
+  function maybeReadyCursor() {
+    if (!finePointer || !hasMoved) return;
+    if (!document.body.classList.contains('preload-complete')) return;
+    document.documentElement.classList.add('cursor-ready');
+  }
 
   window.addEventListener('pointermove', function (e) {
     if (!finePointer) return;
     mouseX = e.clientX;
     mouseY = e.clientY;
+    hasMoved = true;
     if (!cursorShown) {
       cursorX = mouseX;
       cursorY = mouseY;
       cursorEl.classList.add('is-visible');
       cursorShown = true;
     }
+    maybeReadyCursor();
   });
   document.addEventListener('mouseleave', function () {
+    // Pointer left the window: hand the system cursor back.
     cursorEl.classList.remove('is-visible');
     cursorShown = false;
+    document.documentElement.classList.remove('cursor-ready');
   });
   portalBtn.addEventListener('pointerenter', function () { cursorEl.classList.add('is-enter'); });
   portalBtn.addEventListener('pointerleave', function () { cursorEl.classList.remove('is-enter'); });
@@ -809,6 +831,7 @@ body.arcade-open .custom-cursor{opacity:0!important}
     logo.classList.add('is-docked');
     preloader.classList.add('is-background');
     document.body.classList.add('preload-complete');
+    maybeReadyCursor();
     startExperience();
     setTimeout(function () { if (preloaderCount.parentNode) preloaderCount.parentNode.removeChild(preloaderCount); }, 750);
     setTimeout(function () { logo.classList.add('is-settled'); }, 2000);
@@ -863,6 +886,9 @@ body.arcade-open .custom-cursor{opacity:0!important}
     arcade.classList.add('is-open');
     arcade.setAttribute('aria-hidden', 'false');
     document.body.classList.add('arcade-open');
+    // Inside the panel the floating cursor is hidden, so hand the real pointer
+    // back — otherwise html.cursor-ready would leave the panel without a cursor.
+    document.documentElement.classList.remove('cursor-ready');
     arcadeClose.focus();
   }
 
@@ -870,6 +896,7 @@ body.arcade-open .custom-cursor{opacity:0!important}
     arcade.classList.remove('is-open');
     arcade.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('arcade-open');
+    maybeReadyCursor();
     menuBtn.focus();
   }
 
